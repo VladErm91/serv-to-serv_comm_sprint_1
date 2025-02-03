@@ -1,0 +1,77 @@
+name: Python Package
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [ "3.10"]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r mongo_app/app/requirements.txt
+          pip install  wemake-python-styleguide flake8-html mypy lxml
+
+      - name: Create folder for report
+        run: |
+          mkdir -p reports/wemake-python-styleguide/
+          mkdir -p reports/mypy/
+
+      - name: Run flake8
+        run: |
+          flake8 mongo_app/app --exit-zero --format=html --htmldir=reports/wemake-python-styleguide/
+      
+      - name: Run mypy
+        run: |
+          mypy --html-report reports/mypy/ mongo_app/app/* || true
+
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-${{ matrix.python-version }}
+          path: reports/
+
+      - name: Setup environment variables
+        run: |
+          echo "PROJECT_NAME=${{ secrets.PROJECT_NAME }}" >> .env
+          echo "PUBLIC_KEY=${{ secrets.PUBLIC_KEY }}" >> .env
+          echo "DEFAULT_HOST=${{ secrets.DEFAULT_HOST }}" >> .env
+          echo "DEFAULT_PORT=${{ secrets.DEFAULT_PORT }}" >> .env
+          echo "MONGO__URL=${{ secrets.MONGO__URL }}" >> .env
+
+    #To Do:
+      # - name: Run tests
+      #   run: |
+      #     python mongo_app/scripts/generate_data.py
+      #     pytest mongo_app/tests/
+
+  notification:
+    name: Telegram Notification
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    needs: build
+    steps:
+    - name: Send telegram notification
+      uses:  xinthink/action-telegram@v1.1
+      with:
+        to: ${{ secrets.TELEGRAM_TO }}
+        token: ${{ secrets.TELEGRAM_TOKEN }}
+        message: |
+          Great ${{ github.actor }}
+          Сreated new Pull Request
+          Please review the changes and check the code: 
