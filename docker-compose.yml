@@ -1,6 +1,0 @@
-include:
-  - 'docker-compose_main.yml'
-  - './ugc_service/ugc.yml'
-  - './rating_review_api/rating-review.yml'
-  - './notifications_api/notifications.yml'
-  - './infra/nginx.yml'
