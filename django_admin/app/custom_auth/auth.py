@@ -71,7 +71,6 @@ class CustomBackend(BaseBackend):
         decoded_token = self.decoded_token(access_token=access_token)
         if not decoded_token:
             return None
-        # print(decoded_token)
 
         user_id = decoded_token.get("id")
         user_login = decoded_token.get("login")

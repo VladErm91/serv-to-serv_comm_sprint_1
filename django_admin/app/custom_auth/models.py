@@ -1,3 +1,4 @@
+# django_admin/app/custom_auth/models.py
 import uuid
 
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
@@ -34,6 +35,12 @@ class User(AbstractBaseUser):
     is_admin = models.BooleanField(default=False)
     last_login = models.DateTimeField(_("last login"), blank=True, null=True)
 
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    push_token = models.CharField(max_length=255, blank=True, null=True)
+    notification_settings = models.JSONField(
+        default=dict, blank=True, null=True
+    )  # Настройки уведомлений
+
     # строка с именем поля модели, которая используется в качестве уникального идентификатора
     USERNAME_FIELD = "login"
 
@@ -46,7 +53,7 @@ class User(AbstractBaseUser):
         verbose_name_plural = "Пользователи"
 
     def __str__(self):
-        return f"{self.email} {self.id}"
+        return self.login
 
     def has_perm(self, perm, obj=None):
         return True

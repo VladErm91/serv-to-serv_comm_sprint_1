@@ -9,19 +9,18 @@ ENV UWSGI_THREADS 16
 ENV UWSGI_HARAKIRI 240
 ENV DJANGO_SETTINGS_MODULE 'config.settings'
 
-
 COPY requirements.txt requirements.txt
-COPY uwsgi/uwsgi.ini uwsgi.ini
 
-RUN  pip install --upgrade pip \ 
-     && pip install -r requirements.txt --no-cache
+RUN pip install --upgrade pip \
+    && pip install -r requirements.txt --no-cache
 
 COPY . .
 
-RUN chmod +x run_uwsgi.sh && mkdir /opt/app/static && mkdir /opt/app/uploads
+RUN mkdir -p /opt/app/static /opt/app/uploads \
+    && chmod 755 run_uwsgi.sh \
+    && chmod -R 777 /opt/app/static /opt/app/uploads \
+    && chown -R www-data:www-data /opt/app
 
 EXPOSE 8081
 
-
-#ENTRYPOINT ["uwsgi", "--strict", "--ini", "uwsgi.ini"]
-ENTRYPOINT ["/opt/app/run_uwsgi.sh"]
+ENTRYPOINT ["sh", "-c", "chmod +x /opt/app/run_uwsgi.sh && /opt/app/run_uwsgi.sh"]

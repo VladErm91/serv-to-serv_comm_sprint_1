@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-05-20 18:59+0300\n"
+"POT-Creation-Date: 2024-12-21 11:20+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,23 +20,93 @@ msgstr ""
 "%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n"
 "%100>=11 && n%100<=14)? 2 : 3);\n"
 
-#: .\movies\admin.py:26 .\movies\models.py:46
+#: .\custom_auth\apps.py:8
+msgid "custom_auth"
+msgstr ""
+
+#: .\custom_auth\models.py:27
+msgid "login"
+msgstr ""
+
+#: .\custom_auth\models.py:28
+msgid "email address"
+msgstr ""
+
+#: .\custom_auth\models.py:29
+msgid "password"
+msgstr ""
+
+#: .\custom_auth\models.py:30
+#, fuzzy
+#| msgid "full name"
+msgid "first name"
+msgstr "Полное имя"
+
+#: .\custom_auth\models.py:31
+#, fuzzy
+#| msgid "full name"
+msgid "last name"
+msgstr "Полное имя"
+
+#: .\custom_auth\models.py:32
+#, fuzzy
+#| msgid "created"
+msgid "created at"
+msgstr "создан"
+
+#: .\custom_auth\models.py:35
+msgid "last login"
+msgstr ""
+
+#: .\notifications\admin.py:14
+msgid "user"
+msgstr "Пользователь"
+
+#: .\notifications\admin.py:15
+msgid "users"
+msgstr "Пользователи"
+
+#: .\notifications\admin.py:22
+msgid "group"
+msgstr "Группа отправки"
+
+#: .\notifications\admin.py:23
+msgid "groups"
+msgstr "Группы оправки"
+
+#: .\notifications\apps.py:8 .\notifications\models.py:72
+msgid "notifications"
+msgstr "Уведомления"
+
+#: .\notifications\models.py:30
+msgid "template"
+msgstr "Шаблон"
+
+#: .\notifications\models.py:31
+msgid "templates"
+msgstr "Шаблоны"
+
+#: .\notifications\models.py:71
+msgid "notification"
+msgstr "Уведомление"
+
+#: .\movies\admin.py:26 .\movies\models.py:52
 msgid "genre"
 msgstr "жанр"
 
-#: .\movies\admin.py:27 .\movies\admin.py:43 .\movies\models.py:47
+#: .\movies\admin.py:27 .\movies\admin.py:53 .\movies\models.py:53
 msgid "genres"
 msgstr "жанры"
 
-#: .\movies\admin.py:32 .\movies\models.py:70
+#: .\movies\admin.py:36 .\movies\models.py:76
 msgid "person"
 msgstr "персонаж"
 
-#: .\movies\admin.py:33 .\movies\models.py:71
+#: .\movies\admin.py:37 .\movies\models.py:77
 msgid "persons"
 msgstr "персонажи"
 
-#: .\movies\apps.py:8 .\movies\models.py:34
+#: .\movies\apps.py:8 .\movies\models.py:40
 msgid "movies"
 msgstr "фильмы"
 
@@ -48,54 +118,56 @@ msgstr "создан"
 msgid "modified"
 msgstr "изменен"
 
-#: .\movies\models.py:13
+#: .\movies\models.py:14
 msgid "title"
 msgstr "Название"
 
-#: .\movies\models.py:14
+#: .\movies\models.py:15
 msgid "description"
 msgstr "Описание"
 
-#: .\movies\models.py:16
+#: .\movies\models.py:17
 msgid "creation date"
 msgstr "Дата создания"
 
-#: .\movies\models.py:19
+#: .\movies\models.py:22
 msgid "rating"
 msgstr "Рейтинг"
 
-#: .\movies\models.py:25
+#: .\movies\models.py:28
 msgid "type"
 msgstr "Тип"
 
-#: .\movies\models.py:29
+#: .\movies\models.py:35
 msgid "file"
 msgstr "файл"
 
-#: .\movies\models.py:33
+#: .\movies\models.py:39
 msgid "movie"
 msgstr "фильм"
 
-#: .\movies\models.py:41
+#: .\movies\models.py:47
 msgid "name"
 msgstr "Название"
 
-#: .\movies\models.py:66
+#: .\movies\models.py:72
 msgid "full name"
 msgstr "Полное имя"
 
-#: .\movies\models.py:79
+#: .\movies\models.py:85
 msgid "actor"
 msgstr "Актер"
 
-#: .\movies\models.py:80
-msgid "screenwriter"
+#: .\movies\models.py:86
+#, fuzzy
+#| msgid "screenwriter"
+msgid "writer"
 msgstr "Сценарист"
 
-#: .\movies\models.py:81
+#: .\movies\models.py:87
 msgid "director"
 msgstr "Режисер"
 
-#: .\movies\models.py:85
+#: .\movies\models.py:91
 msgid "role"
 msgstr "Роль"

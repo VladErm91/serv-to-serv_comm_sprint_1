@@ -12,6 +12,13 @@ services:
       - auth
       - app
       - file_api
+      - rating_review_api
+      - notification_api
+      - logstash
     ports:
-    - "80:80"
-    
+      - "80:80"
+    logging:
+      driver: gelf
+      options:
+        gelf-address: udp://127.0.0.1:5044
+        tag: nginx

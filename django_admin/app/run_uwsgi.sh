@@ -2,7 +2,10 @@
 
 set -e
 
+echo "Starting Django application..."
 python manage.py collectstatic --no-input
 # python manage.py migrate --fake-initial
 
-uwsgi --strict --ini uwsgi.ini
+echo "Starting uWSGI server..."
+ls -la /opt/app/uwsgi/uwsgi.ini
+uwsgi --strict --ini /opt/app/uwsgi/uwsgi.ini
