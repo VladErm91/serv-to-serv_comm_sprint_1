@@ -1,0 +1,24 @@
+[flake8]
+# Base flake8 configuration:
+# https://flake8.pycqa.org/en/latest/user/configuration.html
+format = wemake
+show-source = true
+statistics = false
+doctests = false
+
+# Plugins:
+max-complexity = 6
+max-line-length = 120
+
+# darglint configuration:
+# https://github.com/terrencepreilly/darglint
+# Self settings:
+max-imports = 17
+
+# Excluding some directories:
+exclude = .tox,.git,*/migrations/*,*/static/CACHE/*, docs, migrations,__pycache__,node_modules,venv,alembic, .venv, .eggs, *.egg, dist, tests, tests/fixtures/**, tests/**/__snapshots__/**, test_db, alembic, nginx, schema_design
+
+# Exclude some pydoctest checks globally:
+#ignore = D100, D104, D401, W504, RST303, RST304, DAR103, DAR203, Q000,
+select = B,C,E,F,W
+ignore = W291,W293,W503,F403,C901,WPS458,WPS305,WPS323,C812,WPS407,B008,WPS404,E501,WPS432,WPS237,WPS336,WPS111,WPS229,WPS110,WPS420,WPS430,WPS442,WPS210,WPS507,WPS226,WPS202,WPS301,C408,WPS318,WPS605,WPS602,WPS229,R504,E501,WPS300,WPS305,WPS348,S101,S113,WPS432,WPS440,WPS442,WPS210

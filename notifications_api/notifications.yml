@@ -1,0 +1,148 @@
+services:
+
+# ---- сервис notification ----
+  # mongodb:
+  #   image: mongo:8.0.0
+  #   container_name: mongodb
+  #   restart: always
+  #   volumes:
+  #     - ./mongodb/data:/data/db
+  #   healthcheck:
+  #     test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #     start_period: 10s
+  #   ports:
+  #     - "27017:27017"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      - RABBITMQ_DEFAULT_USER=rmuser
+      - RABBITMQ_DEFAULT_PASS=rmpassword
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  notification_api:
+    build: ./app
+    ports:
+      - "8765:8765"
+    environment:
+      - MONGODB_URL=mongodb://mongodb:27017
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=rmuser
+      - RABBITMQ_PASS=rmpassword
+      - CELERY_BROKER_URL=amqp://rmuser:rmpassword@rabbitmq:5672//
+      - CELERY_RESULT_BACKEND=rpc://rmuser:rmpassword@rabbitmq:5672//
+    volumes:
+      - ./app:/app
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  notification_worker:
+    build: 
+      context: ./app
+      dockerfile: Dockerfile.worker
+    environment:
+      - MONGODB_URL=mongodb://mongodb:27017
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=rmuser
+      - RABBITMQ_PASS=rmpassword
+      - CELERY_BROKER_URL=amqp://rmuser:rmpassword@rabbitmq:5672//
+      - CELERY_RESULT_BACKEND=rpc://rmuser:rmpassword@rabbitmq:5672//
+    volumes:
+      - ./app:/app
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  event_worker:
+    build: ./workers/event_worker
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=rmuser
+      - RABBITMQ_PASS=rmpassword
+    volumes:
+      - ./workers/event_worker:/event_worker
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  scheduled_celery_worker:
+    build: 
+      context: ./workers/scheduled_worker
+      dockerfile: Dockerfile.worker
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=rmguest
+      - RABBITMQ_PASS=rmpassword
+      - CELERY_BROKER_URL=amqp://rmuser:rmpassword@rabbitmq:5672//
+      - CELERY_RESULT_BACKEND=rpc://rmuser:rmpassword@rabbitmq:5672//
+    volumes:
+      - ./workers/scheduled_worker:/scheduled_worker
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  scheduled_worker:
+    build: ./workers/scheduled_worker
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=rmuser
+      - RABBITMQ_PASS=rmpassword
+    volumes:
+      - ./workers/scheduled_worker:/scheduled_worker
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+  websender:
+    build:
+      context: ./workers/push_notifications
+      dockerfile: Dockerfile
+    ports:
+      - "8005:8005"
+    depends_on:
+      - notification_api
+      - rabbitmq
+
+  sender:
+    build: ./workers/sender
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=rmuser
+      - RABBITMQ_PASS=rmpassword
+    volumes: 
+      - ./workers/sender:/sender
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  mailhog:
+    image: mailhog/mailhog
+    restart: always
+
+volumes:
+  #mongodb_data:
+  rabbitmq_data:
