@@ -1,0 +1,101 @@
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: staticfiles-pv
+  labels:
+    type: local
+    app: django-admin-staticfiles
+spec:
+  storageClassName: manual
+  capacity:  
+    storage: 1Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/data/static"
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: staticfiles-pvc
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  volumeName: staticfiles-pv
+---
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: django-admin-staticfiles
+spec:
+  #ttlSecondsAfterFinished: 100
+  activeDeadlineSeconds: 100000000
+  backoffLimit: 3
+  template:
+    spec:
+      volumes:
+      - name: staticfiles
+        persistentVolumeClaim:
+          claimName: staticfiles-pvc
+      containers:
+      - name: staticfiles-container
+        image: rikhoff/movies_admin:latest
+        command: ["python", "manage.py", "collectstatic", "--noinput"]
+        imagePullPolicy: Always
+        envFrom:
+          - secretRef:
+              name: api-movie-env
+        ports:
+        - containerPort: 8081
+        volumeMounts:
+          - mountPath: "/data/static"
+            name: staticfiles
+      restartPolicy: OnFailure
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: staticfiles-service
+spec:
+  selector:
+    app: staticfiles
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: staticfiles-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: staticfiles
+  template:
+    metadata:
+      labels:
+        app: staticfiles
+    spec:
+      volumes:
+        - name: staticfiles
+          persistentVolumeClaim:
+            claimName: staticfiles-pvc
+      containers:
+        - name: nginx
+          image: nginx:1.25
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - mountPath: "/usr/share/nginx/html/static"
+              name: staticfiles
+---

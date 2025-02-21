@@ -16,9 +16,9 @@ RUN pip install --upgrade pip \
 
 COPY . .
 
-RUN mkdir -p /opt/app/static /opt/app/uploads \
+RUN mkdir -p /opt/app/staticfiles /opt/app/uploads \
     && chmod 755 run_uwsgi.sh \
-    && chmod -R 777 /opt/app/static /opt/app/uploads \
+    && chmod -R 777 /opt/app/staticfiles /opt/app/uploads \
     && chown -R www-data:www-data /opt/app
 
 EXPOSE 8081

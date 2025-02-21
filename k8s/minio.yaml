@@ -1,0 +1,68 @@
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: minio-pvc
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: minio-deployment
+spec:
+  selector:
+    matchLabels:
+      app: minio
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: minio
+    spec:
+      volumes:
+      - name: storage
+        persistentVolumeClaim:
+          claimName: minio-pvc
+      containers:
+      - name: minio
+        image: minio/minio:latest
+        args:
+        - server
+        - /storage
+        envFrom:
+          - secretRef:
+              name: api-movie-env
+        ports:
+          - containerPort: 9000
+          - containerPort: 9001
+        volumeMounts:
+          - name: storage
+            mountPath: /data
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio
+  namespace: default
+spec:
+  selector:
+    app: minio
+  ports:
+    - name: api
+      protocol: TCP
+      port: 9000
+      targetPort: 9000
+    - name: console
+      protocol: TCP
+      port: 9001
+      targetPort: 9001
+  type: ClusterIP

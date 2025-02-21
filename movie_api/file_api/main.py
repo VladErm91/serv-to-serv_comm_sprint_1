@@ -24,4 +24,4 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.include_router(file_endpoint.router, prefix="/api/v1/files", tags=["files"])
+app.include_router(file_endpoint.router, prefix="/api/files/v1/file", tags=["files"])

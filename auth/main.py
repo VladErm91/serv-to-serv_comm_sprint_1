@@ -14,6 +14,7 @@ from fastapi_pagination import add_pagination
 
 # from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from starlette.middleware.sessions import SessionMiddleware
+from prometheus_fastapi_instrumentator import Instrumentator
 
 # Логгирование
 logging.basicConfig(level=logging.INFO)
@@ -90,6 +91,7 @@ if settings.enable_tracing:
     configure_tracer()
     # FastAPIInstrumentor.instrument_app(app)
 
+Instrumentator().instrument(app).expose(app)
 
 app.add_middleware(SessionMiddleware, secret_key=settings.secret_key)
 app.include_router(auth.router, prefix="/api/auth/v1/login", tags=["auth"])

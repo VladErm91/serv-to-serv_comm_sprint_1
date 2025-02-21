@@ -48,7 +48,7 @@ typing_extensions==4.12.2
 user-agents==2.2.0
 ujson==5.10.0
 uvicorn==0.30.6
-# uvloop==0.20.0
+uvloop==0.20.0
 watchfiles==0.24.0
 websockets==13.1
 Werkzeug==3.0.4
@@ -58,3 +58,5 @@ opentelemetry-sdk==1.17.0
 opentelemetry-instrumentation-fastapi==0.38b0
 opentelemetry-exporter-jaeger==1.17.0
 itsdangerous==2.2.0
+prometheus-client==0.17.1
+prometheus-fastapi-instrumentator==6.1.0
