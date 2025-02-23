@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-worker
+  template:
+    metadata:
+      labels:
+        app: notification-worker
+    spec:
+      containers:
+      - name: notification-worker
+        image: your-notification-worker-image:latest  # Замени на свой образ
+        env:
+        - name: MONGODB_URL
+          value: "mongodb://mongodb:27017"
+        - name: RABBITMQ_HOST
+          value: "rabbitmq"
+        - name: RABBITMQ_PORT
+          value: "5672"
+        - name: RABBITMQ_USER
+          value: "rmuser"
+        - name: RABBITMQ_PASS
+          value: "rmpassword"
+        - name: CELERY_BROKER_URL
+          value: "amqp://rmuser:rmpassword@rabbitmq:5672//"
+        - name: CELERY_RESULT_BACKEND
+          value: "rpc://rmuser:rmpassword@rabbitmq:5672//"
