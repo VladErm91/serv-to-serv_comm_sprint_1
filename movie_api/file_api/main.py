@@ -25,3 +25,8 @@ app = FastAPI(
 )
 
 app.include_router(file_endpoint.router, prefix="/api/files/v1/file", tags=["files"])
+
+# Эндпойнт для проверки состояния приложения
+@app.get("/healthcheck")
+async def health_check():
+    return {"status": "OK"}

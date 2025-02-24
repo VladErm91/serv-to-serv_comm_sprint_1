@@ -1,30 +1,29 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: auth-service
+  name: movies-app-service
 spec:
-  type: NodePort
   selector:
-    app: auth
+    app: movies-app
   ports:
-    - port: 8080
-      targetPort: 8080
-      protocol: TCP
+    - protocol: TCP
+      port: 8000
+  type: ClusterIP
 ---
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: auth-deployment
+  name: movies-app-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: auth
+      app: movies-app
   template:
     metadata:
       labels:
-        app: auth
+        app: movies-app
     spec:
       initContainers:
         - name: wait-for-db
@@ -36,20 +35,23 @@ spec:
         - name: wait-for-redis
           image: busybox
           command: ['sh', '-c', 'until nc -z redis 6379; do echo waiting for redis; sleep 2; done;']
+        - name: wait-for-elasticsearch
+          image: busybox
+          command: ['sh', '-c', 'until nc -z elasticsearch 9200; do echo waiting for elasticsearch; sleep 2; done;']
       containers:
-        - name: auth-container
-          image: rikhoff/movies_auth:latest
+        - name: movies-app-container
+          image: rikhoff/movies_app:latest
           command: [ "uvicorn" ]
-          args: [ "--app-dir", "./src", "main:app", "--host", "0.0.0.0", "--port", "8080" ]
+          args: [ "--app-dir", "./src", "main:app", "--host", "0.0.0.0", "--port", "8000" ]
           envFrom:
             - secretRef:
                 name: api-movie-env
           ports:
-            - containerPort: 8080
+            - containerPort: 8000
           livenessProbe:
             httpGet:
               path: "/healthcheck"
-              port: 8080
+              port: 8000
               httpHeaders:
                 - name: "X-Request-Id"
                   value: "test-request"
@@ -59,35 +61,3 @@ spec:
             failureThreshold: 5 
           imagePullPolicy: IfNotPresent
 ---
-
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: migrations-job
-spec:
-  backoffLimit: 2
-  activeDeadlineSeconds: 10000
-  template:
-    spec:
-      initContainers:
-        - name: wait-for-db
-          image: busybox
-          command: ['sh', '-c', 'until nc -z -v -w30 $DB_HOST $DB_PORT; do echo "Waiting for database..."; sleep 5; done']
-          envFrom:
-            - secretRef:
-                name: api-movie-env
-      containers:
-      - name: backend-container
-        image: rikhoff/movies_auth:latest
-        envFrom:
-          - secretRef:
-              name: api-movie-env
-        imagePullPolicy: Never
-        args:
-        - /bin/sh
-        - -c
-        - alembic upgrade head
-      restartPolicy: Never 
---- 
-
-

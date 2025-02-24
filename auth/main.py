@@ -105,6 +105,6 @@ app.include_router(
 
 
 # Эндпойнт для проверки состояния приложения
-@app.get("/health")
+@app.get("/healthcheck")
 async def health_check():
     return {"status": "OK"}

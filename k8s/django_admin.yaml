@@ -26,6 +26,13 @@ spec:
       labels:
         app: django-admin
     spec:
+      initContainers:
+        - name: wait-for-db
+          image: busybox
+          command: ['sh', '-c', 'until nc -z -v -w30 $DB_HOST $DB_PORT; do echo "Waiting for database..."; sleep 5; done']
+          envFrom:
+            - secretRef:
+                name: api-movie-env
       containers:
         - name: django-admin
           image: rikhoff/movies_admin:latest
