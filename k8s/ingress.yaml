@@ -11,6 +11,7 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-cache-use-stale: "error timeout updating http_500 http_502 http_503 http_504"
     nginx.ingress.kubernetes.io/proxy-cache-background-update: "on"
     nginx.ingress.kubernetes.io/proxy-cache-lock: "on"
+    nginx.ingress.kubernetes.io/add-request-header: "X-Request-Id=$request_id"
 spec:
   ingressClassName: nginx
   rules:

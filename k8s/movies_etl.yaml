@@ -19,9 +19,9 @@ spec:
           envFrom:
             - secretRef:
                 name: api-movie-env 
-        - name: wait-for-elasticsearch
+        - name: wait-for-elastic
           image: busybox
-          command: ['sh', '-c', 'until nc -z elasticsearch 9200; do echo waiting for elasticsearch; sleep 2; done;']
+          command: ['sh', '-c', 'until nc -z elastic 9200; do echo waiting for elasticsearch; sleep 2; done;']
       containers:
         - name: movies-etl
           image: rikhoff/movies_etl:latest 

@@ -68,10 +68,32 @@ data:
   prometheus.yml: |
     global:
       scrape_interval: 15s
+
     scrape_configs:
       - job_name: 'prometheus'
         static_configs:
           - targets: ['localhost:9090']
+
+      - job_name: 'auth-service'
+        scrape_interval: 15s
+        scrape_timeout: 10s
+        metrics_path: /metrics
+        static_configs:
+          - targets: ['auth-service.default.svc.cluster.local:8080']
+
+      - job_name: 'movie-service'
+        scrape_interval: 15s
+        scrape_timeout: 10s
+        metrics_path: /metrics
+        static_configs:
+          - targets: ['movies-app-service.default.svc.cluster.local:8000']
+  
+      - job_name: 'file-service'
+        scrape_interval: 15s
+        scrape_timeout: 10s
+        metrics_path: /metrics
+        static_configs:
+          - targets: ['file-api-service.default.svc.cluster.local:8001']
 ---
 
 apiVersion: v1

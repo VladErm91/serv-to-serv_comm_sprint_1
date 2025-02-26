@@ -37,19 +37,24 @@ app = FastAPI(
 
 @app.middleware("http")
 async def before_request(request: Request, call_next):
-    response = await call_next(request)
+    # Разрешаем запросы к /metrics без X-Request-Id
+    if request.url.path.startswith("/metrics"):
+        return await call_next(request)
+
     request_id = request.headers.get("X-Request-Id")
     if not request_id:
         return ORJSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content={"detail": "X-Request-Id is required"},
         )
+
+    response = await call_next(request)
     return response
 
 
 if settings.enable_tracing:
     configure_tracer()
-    FastAPIInstrumentor.instrument_app(app)
+    #FastAPIInstrumentor.instrument_app(app)
 
 Instrumentator().instrument(app).expose(app)
 

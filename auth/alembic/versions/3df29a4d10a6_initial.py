@@ -167,7 +167,6 @@ def upgrade() -> None:
             autoincrement=False,
             nullable=True,
         ),
-        sa.Column("user_agent", sa.TEXT(), autoincrement=False, nullable=False),
         sa.Column("user_device_type", sa.TEXT(), autoincrement=False, nullable=False),
         sa.ForeignKeyConstraint(
             ["user_id"],
@@ -247,7 +246,6 @@ def upgrade() -> None:
             nullable=True,
             comment="Дата обновления записи",
         ),
-        sa.Column("user_agent", sa.TEXT(), autoincrement=False, nullable=False),
         sa.Column(
             "user_device_type",
             sa.TEXT(),
@@ -281,7 +279,6 @@ def upgrade() -> None:
             autoincrement=False,
             nullable=True,
         ),
-        sa.Column("user_agent", sa.TEXT(), autoincrement=False, nullable=False),
         sa.Column("user_device_type", sa.TEXT(), autoincrement=False, nullable=False),
         sa.ForeignKeyConstraint(
             ["user_id"],
@@ -296,7 +293,7 @@ def upgrade() -> None:
     op.create_table(
         "users_auth_in_mobile",
         sa.Column("id", sa.UUID(), autoincrement=False, nullable=False),
-        sa.Column("user_id", sa.UUID(), autoincrement=False, nullable=True),
+        sa.Column("user_id", sa.UUID(), autoincrement=False, nullablC:\Users\Vlad\Dev\serv-to-serv_comm_sprint_1\schema_design\dump_db.sqle=True),
         sa.Column("success", sa.BOOLEAN(), autoincrement=False, nullable=False),
         sa.Column(
             "created_at",
@@ -311,7 +308,6 @@ def upgrade() -> None:
             autoincrement=False,
             nullable=True,
         ),
-        sa.Column("user_agent", sa.TEXT(), autoincrement=False, nullable=False),
         sa.Column("user_device_type", sa.TEXT(), autoincrement=False, nullable=False),
         sa.ForeignKeyConstraint(
             ["user_id"],
