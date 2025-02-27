@@ -18,16 +18,16 @@ data:
 
     receivers:
       - name: email-receiver
-        email_configs:
-          - to: "your_email@example.com"
-            from: "alertmanager@example.com"
-            smarthost: "smtp.example.com:587"
-            auth_username: "your_username"
-            auth_password: "your_password"
+    email_configs:
+      - to: "${ALERT_EMAIL_TO}"
+        from: "${ALERT_EMAIL_FROM}"
+        smarthost: "${ALERT_EMAIL_SMARTHOST}"
+        auth_username: "${ALERT_EMAIL_USERNAME}"
+        auth_password: "${ALERT_EMAIL_PASSWORD}"
 
       - name: telegram-receiver
         webhook_configs:
-          - url: "https://api.telegram.org/bot<your_bot_token>/sendMessage?chat_id=<your_chat_id>"
+          - url: "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}"
 ---
 # Deployment для Alertmanager
 apiVersion: apps/v1

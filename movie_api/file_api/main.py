@@ -25,6 +25,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+
 @app.middleware("http")
 async def before_request(request: Request, call_next):
     # Разрешаем запросы к /metrics без X-Request-Id
@@ -41,9 +42,11 @@ async def before_request(request: Request, call_next):
     response = await call_next(request)
     return response
 
+
 Instrumentator().instrument(app).expose(app)
 
 app.include_router(file_endpoint.router, prefix="/api/files/v1/file", tags=["files"])
+
 
 # Эндпойнт для проверки состояния приложения
 @app.get("/healthcheck")

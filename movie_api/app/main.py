@@ -11,6 +11,7 @@ from fastapi.responses import ORJSONResponse
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from prometheus_fastapi_instrumentator import Instrumentator
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     redis = get_cache_service()
@@ -54,7 +55,7 @@ async def before_request(request: Request, call_next):
 
 if settings.enable_tracing:
     configure_tracer()
-    #FastAPIInstrumentor.instrument_app(app)
+    # FastAPIInstrumentor.instrument_app(app)
 
 Instrumentator().instrument(app).expose(app)
 
@@ -62,8 +63,8 @@ app.include_router(films.router, prefix="/api/v1/films", tags=["films"])
 app.include_router(persons.router, prefix="/api/v1/persons", tags=["persons"])
 app.include_router(genres.router, prefix="/api/v1/genres", tags=["genres"])
 
+
 # Эндпойнт для проверки состояния приложения
 @app.get("/healthcheck")
 async def health_check():
     return {"status": "OK"}
-
