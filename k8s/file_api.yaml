@@ -26,6 +26,10 @@ spec:
       labels:
         app: file-api
     spec:
+      initContainers:
+        - name: wait-for-minio
+          image: busybox
+          command: ['sh', '-c', 'until nc -z minio 9000; do echo waiting for minio; sleep 2; done;']
       containers:
         - name: file-api-container
           image: rikhoff/movies_file_api:latest
@@ -36,5 +40,13 @@ spec:
                 name: api-movie-env
           ports:
             - containerPort: 8001
+          livenessProbe:
+            httpGet:
+              path: "/healthcheck"
+              port: 8001
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            timeoutSeconds: 2
+            failureThreshold: 5 
           imagePullPolicy: IfNotPresent
 ---

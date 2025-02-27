@@ -1,20 +1,21 @@
 import logging
 from contextlib import asynccontextmanager
 
+from fastapi import FastAPI, HTTPException, Request, status
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import ORJSONResponse
+from fastapi_pagination import add_pagination
+from prometheus_fastapi_instrumentator import Instrumentator
+
+# from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from starlette.middleware.sessions import SessionMiddleware
+
 from api.v1 import auth, history_auth, role, users
 from core.config import settings
 from core.request_limit import request_limiter
 from core.tracer import configure_tracer
 from db.db import create_database
 from db.redis import close_redis, init_redis
-from fastapi import FastAPI, HTTPException, Request, status
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import ORJSONResponse
-from fastapi_pagination import add_pagination
-
-# from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-from starlette.middleware.sessions import SessionMiddleware
-from prometheus_fastapi_instrumentator import Instrumentator
 
 # Логгирование
 logging.basicConfig(level=logging.INFO)
@@ -76,14 +77,18 @@ async def requests_limit_checker(request: Request, call_next):
 
 @app.middleware("http")
 async def before_request(request: Request, call_next):
+    # Разрешаем запросы к /metrics без X-Request-Id
+    if request.url.path.startswith("/metrics"):
+        return await call_next(request)
 
-    response = await call_next(request)
     request_id = request.headers.get("X-Request-Id")
     if not request_id:
         return ORJSONResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
             content={"detail": "X-Request-Id is required"},
         )
+
+    response = await call_next(request)
     return response
 
 
@@ -105,6 +110,6 @@ app.include_router(
 
 
 # Эндпойнт для проверки состояния приложения
-@app.get("/health")
+@app.get("/healthcheck")
 async def health_check():
     return {"status": "OK"}

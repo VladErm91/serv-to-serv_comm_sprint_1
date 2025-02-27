@@ -1,10 +1,13 @@
 import logging
 from uuid import UUID
 
+from fastapi import APIRouter, Depends, Header, HTTPException, status
+from prometheus_client import Counter
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from api.v1.role import is_admin
 from core.auth import get_current_user
 from db.db import get_session
-from fastapi import APIRouter, Depends, Header, HTTPException, status
 from models.user import User
 from repositories.password_repository import update_password
 from repositories.user_repository import (
@@ -19,11 +22,14 @@ from schemas.user import UserCreate, UserOut, UserProfile, UserUpdate
 from services.token_service import decode_token, verify_old_password
 from services.user_activity_service import log_user_action
 from services.user_service import build_user_profile, register_user, update_user_profile
-from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+user_registration_counter = Counter(
+    "user_registration_total", "Total number of registered users"
+)
 
 
 # Регистрация пользователя
@@ -41,7 +47,9 @@ async def register(
         )
 
     new_user = await register_user(db, user)
+    user_registration_counter.inc()
     logger.info(f"User {new_user.login} registered successfully.")
+
     return new_user
 
 
@@ -116,6 +124,7 @@ async def delete(
         raise HTTPException(status_code=404, detail=f"{user} not found")
     await delete_user(db, user)
     return {"message": f"{user} deleted successfully."}
+
 
 @router.get("/users/{user_id}", response_model=UserProfile)
 async def get_user_profile(

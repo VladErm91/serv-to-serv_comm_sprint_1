@@ -1,7 +1,8 @@
 import datetime
 
-from core.config import settings
 from jose import JWTError, jwt
+
+from core.config import settings
 
 
 # Создание access-токена
