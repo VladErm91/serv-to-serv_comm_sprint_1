@@ -14,7 +14,7 @@ async def lifespan(app: FastAPI):
     await create_bucket(settings.bucket_name)
 
     yield
-    await close_minio_conn()
+    close_minio_conn()
 
 
 app = FastAPI(
@@ -24,6 +24,7 @@ app = FastAPI(
     default_response_class=ORJSONResponse,
     lifespan=lifespan,
 )
+
 @app.middleware("http")
 async def before_request(request: Request, call_next):
     # Разрешаем запросы к /metrics без X-Request-Id

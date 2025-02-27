@@ -1,3 +1,4 @@
+# ConfigMap с конфигурацией Alertmanager
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -18,22 +19,21 @@ data:
     receivers:
       - name: email-receiver
         email_configs:
-          - to: "${ALERT_EMAIL_TO}"
-            from: "${ALERT_EMAIL_FROM}"
-            smarthost: "${ALERT_EMAIL_SMARTHOST}"
-            auth_username: "${ALERT_EMAIL_USERNAME}"
-            auth_password: "${ALERT_EMAIL_PASSWORD}"
+          - to: "your_email@example.com"
+            from: "alertmanager@example.com"
+            smarthost: "smtp.example.com:587"
+            auth_username: "your_username"
+            auth_password: "your_password"
 
       - name: telegram-receiver
         webhook_configs:
-          - url: "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage?chat_id=${TELEGRAM_CHAT_ID}"
-
-
+          - url: "https://api.telegram.org/bot<your_bot_token>/sendMessage?chat_id=<your_chat_id>"
+---
+# Deployment для Alertmanager
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: alertmanager
-  namespace: monitoring
 spec:
   replicas: 1
   selector:
@@ -45,29 +45,30 @@ spec:
         app: alertmanager
     spec:
       containers:
-        - name: alertmanager
-          image: prom/alertmanager
-          args:
-            - "--config.file=/etc/alertmanager/alertmanager.yml"
-          ports:
-            - containerPort: 9093
-          volumeMounts:
-            - name: alertmanager-config-volume
-              mountPath: /etc/alertmanager
+      - name: alertmanager
+        image: prom/alertmanager:v0.23.0
+        args:
+          - "--config.file=/etc/alertmanager/alertmanager.yml"
+        ports:
+          - containerPort: 9093
+        volumeMounts:
+          - name: config-volume
+            mountPath: /etc/alertmanager
       volumes:
-        - name: alertmanager-config-volume
+        - name: config-volume
           configMap:
             name: alertmanager-config
 ---
+# Service для Alertmanager
 apiVersion: v1
 kind: Service
 metadata:
   name: alertmanager-service
-  namespace: monitoring
 spec:
   type: ClusterIP
-  ports:
-    - port: 9093
-      targetPort: 9093
   selector:
     app: alertmanager
+  ports:
+    - name: alertmanager
+      port: 9093
+      targetPort: 9093

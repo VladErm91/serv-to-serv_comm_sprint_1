@@ -1,19 +1,20 @@
 import logging
 from urllib.parse import urlencode
 
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.responses import RedirectResponse
+from fastapi.security import OAuth2PasswordRequestForm
+from redis.asyncio import Redis
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from core.auth import get_user_from_token, oauth2_scheme
 from core.config import settings
 from core.jwt import create_access_token, verify_token
 from db.db import get_session
 from db.redis import get_redis
-from fastapi import APIRouter, Depends, HTTPException, Request, status
-from fastapi.responses import RedirectResponse
-from fastapi.security import OAuth2PasswordRequestForm
-from redis.asyncio import Redis
 from repositories.token_repository import TokenRepository
 from schemas.auth import Token
 from services.auth_service import AuthService
-from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

@@ -1,13 +1,14 @@
-from core.config import settings
-from db.db import get_session
-from db.redis import get_redis
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
-from models.user import User
 from sqlalchemy.future import select
 from sqlalchemy.orm import Session, selectinload
 from starlette.status import HTTP_401_UNAUTHORIZED
+
+from core.config import settings
+from db.db import get_session
+from db.redis import get_redis
+from models.user import User
 
 # Определяем URL для OAuth2PasswordBearer
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/v1/login")

@@ -1,9 +1,10 @@
 import datetime
 from http import HTTPStatus
 
-from core.config import settings
 from fastapi import HTTPException
 from redis.asyncio import Redis
+
+from core.config import settings
 
 
 async def request_limiter(request):

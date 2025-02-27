@@ -2,17 +2,18 @@ import secrets
 from datetime import datetime
 
 import httpx
+from fastapi import HTTPException, Request, status
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+
 from core.config import settings
 from core.device_type import get_device_type
 from core.jwt import create_access_token, create_refresh_token
 from core.security import get_password_hash, verify_password
-from fastapi import HTTPException, Request, status
 from models.history_auth import AuthenticationHistory
-from models.user import User
 from models.social_account import SocialAccount
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from sqlalchemy.exc import IntegrityError
+from models.user import User
 
 
 class AuthService:

@@ -1,11 +1,11 @@
 import os
 from logging import config as logging_config
-
-from core.logger import LOGGING
-from pydantic import Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing import Dict
 
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from core.logger import LOGGING
 
 # Минимальная длина пароля для повышения безопасности
 MIN_PASSWORD_LENGTH = 8

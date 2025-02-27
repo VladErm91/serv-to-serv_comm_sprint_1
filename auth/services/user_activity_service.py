@@ -1,7 +1,8 @@
 import datetime
 
-from models.user import UserActionHistory
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from models.user import UserActionHistory
 
 
 async def log_user_action(session: AsyncSession, user_id, action):

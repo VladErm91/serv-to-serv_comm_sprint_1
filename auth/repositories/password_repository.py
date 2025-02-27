@@ -1,9 +1,10 @@
 import logging
 
-from core.security import get_password_hash
 from fastapi import HTTPException, status
-from models.user import User
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from core.security import get_password_hash
+from models.user import User
 
 logger = logging.getLogger(__name__)
 
