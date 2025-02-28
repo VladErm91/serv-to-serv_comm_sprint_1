@@ -6,6 +6,6 @@ spec:
   selector:
     app: notification-api
   ports:
-  - port: 8765
-    targetPort: 8765
-  type: LoadBalancer
+    - protocol: TCP
+      port: 8765
+      targetPort: 8765

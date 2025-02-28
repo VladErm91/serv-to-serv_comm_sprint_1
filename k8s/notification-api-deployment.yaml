@@ -13,22 +13,17 @@ spec:
         app: notification-api
     spec:
       containers:
-      - name: notification-api
-        image: your-notification-api-image:latest  # Замени на свой образ
-        ports:
-        - containerPort: 8765
-        env:
-        - name: MONGODB_URL
-          value: "mongodb://mongodb:27017"
-        - name: RABBITMQ_HOST
-          value: "rabbitmq"
-        - name: RABBITMQ_PORT
-          value: "5672"
-        - name: RABBITMQ_USER
-          value: "rmuser"
-        - name: RABBITMQ_PASS
-          value: "rmpassword"
-        - name: CELERY_BROKER_URL
-          value: "amqp://rmuser:rmpassword@rabbitmq:5672//"
-        - name: CELERY_RESULT_BACKEND
-          value: "rpc://rmuser:rmpassword@rabbitmq:5672//"
+        - name: notification-api
+          image: notification_api:latest
+          envFrom:
+            - configMapRef:
+                name: notification-config
+          ports:
+            - containerPort: 8765
+          volumeMounts:
+            - name: app-storage
+              mountPath: /app
+      volumes:
+        - name: app-storage
+          hostPath:
+            path: ./app

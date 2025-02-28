@@ -13,20 +13,23 @@ spec:
         app: rabbitmq
     spec:
       containers:
-      - name: rabbitmq
-        image: rabbitmq:3-management
-        env:
-        - name: RABBITMQ_DEFAULT_USER
-          value: "rmuser"
-        - name: RABBITMQ_DEFAULT_PASS
-          value: "rmpassword"
-        ports:
-        - containerPort: 5672
-        - containerPort: 15672
-        volumeMounts:
-        - mountPath: /var/lib/rabbitmq
-          name: rabbitmq-data
+        - name: rabbitmq
+          image: rabbitmq:3-management
+          envFrom:
+            - configMapRef:
+                name: app-config
+          volumeMounts:
+            - name: rabbitmq-storage
+              mountPath: /var/lib/rabbitmq
+          ports:
+            - containerPort: 5672
+            - containerPort: 15672
+          livenessProbe:
+            exec:
+              command: ["rabbitmq-diagnostics", "check_port_connectivity"]
+            initialDelaySeconds: 10
+            periodSeconds: 10
       volumes:
-      - name: rabbitmq-data
-        persistentVolumeClaim:
-          claimName: rabbitmq-pvc
+        - name: rabbitmq-storage
+          persistentVolumeClaim:
+            claimName: rabbitmq-pvc

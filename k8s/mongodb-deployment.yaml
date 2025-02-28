@@ -13,14 +13,19 @@ spec:
         app: mongodb
     spec:
       containers:
-      - name: mongodb
-        image: mongo:8.0.0
-        ports:
-        - containerPort: 27017
-        volumeMounts:
-        - mountPath: /data/db
-          name: mongodb-data
+        - name: mongodb
+          image: mongo:8.0.0
+          volumeMounts:
+            - name: mongodb-storage
+              mountPath: /data/db
+          ports:
+            - containerPort: 27017
+          livenessProbe:
+            exec:
+              command: ["mongosh", "--eval", "db.adminCommand('ping')"]
+            initialDelaySeconds: 10
+            periodSeconds: 10
       volumes:
-      - name: mongodb-data
-        persistentVolumeClaim:
-          claimName: mongodb-pvc
+        - name: mongodb-storage
+          persistentVolumeClaim:
+            claimName: mongodb-pvc
