@@ -2,13 +2,12 @@ import logging
 from uuid import UUID
 
 from async_fastapi_jwt_auth import AuthJWT
+from db.db import get_session
 from fastapi import APIRouter, Depends, status
 from fastapi_pagination import Page, paginate
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from db.db import get_session
 from schemas.history_auth import HistoryAuthDBModel
 from services.history_auth_service import AuthHistoryService
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter()
 

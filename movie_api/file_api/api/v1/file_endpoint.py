@@ -1,12 +1,23 @@
+import time
 from http import HTTPStatus
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile
 from models.filedb import FileDBResponse
+from prometheus_client import Counter, Histogram
 from services.files import FileService, get_file_service
 from starlette.responses import StreamingResponse
 
 router = APIRouter()
+
+
+# Гистограмма времени обработки загрузки файла
+file_upload_duration = Histogram(
+    "file_upload_duration_seconds", "Time spent processing file upload"
+)
+file_upload_size_bytes = Counter(
+    "file_upload_size_bytes", "Total size of uploaded files in bytes", ["file_type"]
+)
 
 
 @router.post(
@@ -46,7 +57,11 @@ async def upload_file(
     later using the file's `short_name`.
     """
     try:
+        start_time = time.time()
         file_data = await file_service.save(file, path)
+        file_upload_duration.observe(time.time() - start_time)  # фиксируем длительность
+        file_upload_size_bytes.labels(file_type=file_type).inc(file_data.size)
+
         return FileDBResponse(
             id=file_data.id,
             path_in_storage=file_data.path_in_storage,

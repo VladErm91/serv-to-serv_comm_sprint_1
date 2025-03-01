@@ -1,11 +1,10 @@
 import uuid
 
+from db.db import Base
+from models.user import User
 from sqlalchemy import Column, ForeignKey, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import backref, relationship
-
-from db.db import Base
-from models.user import User
 
 
 class SocialAccount(Base):

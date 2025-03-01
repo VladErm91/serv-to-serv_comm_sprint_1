@@ -1,23 +1,32 @@
 import logging
+import time
 from urllib.parse import urlencode
-
-from fastapi import APIRouter, Depends, HTTPException, Request, status
-from fastapi.responses import RedirectResponse
-from fastapi.security import OAuth2PasswordRequestForm
-from redis.asyncio import Redis
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.auth import get_user_from_token, oauth2_scheme
 from core.config import settings
 from core.jwt import create_access_token, verify_token
 from db.db import get_session
 from db.redis import get_redis
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi.responses import RedirectResponse
+from fastapi.security import OAuth2PasswordRequestForm
+from prometheus_client import Histogram
+from redis.asyncio import Redis
 from repositories.token_repository import TokenRepository
 from schemas.auth import Token
 from services.auth_service import AuthService
+from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
+
+
+auth_login_duration_seconds = Histogram(
+    "auth_login_duration_seconds", "Login request duration"
+)
+auth_refresh_duration_seconds = Histogram(
+    "auth_refresh_duration_seconds", "Refresh token request duration"
+)
 
 
 @router.post("/", response_model=Token)
@@ -27,6 +36,7 @@ async def login(
     db: AsyncSession = Depends(get_session),
     redis: Redis = Depends(get_redis),
 ):
+    start = time.time()
     # Аутентификация пользователя
     user = await AuthService.authenticate_user(
         db, form_data.username, form_data.password, request
@@ -53,6 +63,8 @@ async def login(
         settings.access_token_expire_minutes * 60,
         settings.refresh_token_expire_days * 86400,
     )
+
+    auth_login_duration_seconds.observe(time.time() - start)
 
     return {
         "access_token": access_token,

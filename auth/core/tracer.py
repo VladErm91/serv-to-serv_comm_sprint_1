@@ -1,3 +1,4 @@
+from core.config import settings
 from fastapi import FastAPI
 from opentelemetry import trace
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
@@ -5,8 +6,6 @@ from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
-
-from core.config import settings
 
 
 def configure_tracer() -> None:

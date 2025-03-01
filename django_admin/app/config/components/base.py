@@ -71,7 +71,7 @@ REST_FRAMEWORK = {
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware", 
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -144,13 +144,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
-if os.getenv('STATIC_ROOT'):
-    STATIC_ROOT = os.getenv('STATIC_ROOT')
+STATIC_URL = "static/"
+if os.getenv("STATIC_ROOT"):
+    STATIC_ROOT = os.getenv("STATIC_ROOT")
 else:
     STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
-#STATIC_ROOT = "/opt/app/staticfiles"  # Папка для сбора статики
+# STATIC_ROOT = "/opt/app/staticfiles"  # Папка для сбора статики
 
 # Оптимизация хранения статических файлов
 STORAGES = {

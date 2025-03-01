@@ -1,11 +1,10 @@
 import datetime
 import uuid
 
+from db.db import Base
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, String, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
-
-from db.db import Base
 
 
 # Основная модель пользователя

@@ -1,9 +1,8 @@
 import logging
 
+from core.config import MIN_PASSWORD_LENGTH
 from fastapi import HTTPException, status
 from passlib.context import CryptContext
-
-from core.config import MIN_PASSWORD_LENGTH
 
 logger = logging.getLogger(__name__)
 

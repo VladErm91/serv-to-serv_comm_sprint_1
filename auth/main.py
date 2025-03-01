@@ -1,6 +1,13 @@
 import logging
 from contextlib import asynccontextmanager
 
+from api.v1 import auth, history_auth, role, users
+from core.config import settings
+from core.metrics import instrument_auth_endpoints, instrument_user_endpoints
+from core.request_limit import request_limiter
+from core.tracer import configure_tracer
+from db.db import create_database
+from db.redis import close_redis, init_redis
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import ORJSONResponse
@@ -9,13 +16,6 @@ from prometheus_fastapi_instrumentator import Instrumentator
 
 # from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 from starlette.middleware.sessions import SessionMiddleware
-
-from api.v1 import auth, history_auth, role, users
-from core.config import settings
-from core.request_limit import request_limiter
-from core.tracer import configure_tracer
-from db.db import create_database
-from db.redis import close_redis, init_redis
 
 # Логгирование
 logging.basicConfig(level=logging.INFO)
@@ -96,7 +96,10 @@ if settings.enable_tracing:
     configure_tracer()
     # FastAPIInstrumentor.instrument_app(app)
 
-Instrumentator().instrument(app).expose(app)
+instrumentator = Instrumentator().instrument(app)
+instrumentator.add(instrument_auth_endpoints())
+instrumentator.add(instrument_user_endpoints())
+instrumentator.expose(app)
 
 app.add_middleware(SessionMiddleware, secret_key=settings.secret_key)
 app.include_router(auth.router, prefix="/api/auth/v1/login", tags=["auth"])

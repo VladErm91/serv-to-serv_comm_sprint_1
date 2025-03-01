@@ -7,11 +7,9 @@ import time
 from email.message import EmailMessage
 
 from aio_pika import Channel
-from dotenv import load_dotenv
-
 from core.rabbitmq import rabbitmq_manager
 from core.settings import settings
-
+from dotenv import load_dotenv
 
 current_dir = os.path.dirname(__file__)
 parent_dir = os.path.dirname(current_dir)

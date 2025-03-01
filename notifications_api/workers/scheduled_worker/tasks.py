@@ -4,7 +4,6 @@ from datetime import datetime
 
 from celery import shared_task
 from celery.exceptions import Ignore
-
 from core.config import settings
 from core.rabbitmq import rabbitmq_manager
 

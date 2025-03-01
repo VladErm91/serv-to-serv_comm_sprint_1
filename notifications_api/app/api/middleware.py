@@ -33,8 +33,15 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
 
         process_time = time.time() - start_time
-        logger.debug("method = %(method)s, path = %(path)s completed in time = %(process_time)d with status code = %(status_code)d", 
-                     {"method": request.method, "path": request.url.path, "process_time": process_time, "code": response.status_code})
+        logger.debug(
+            "method = %(method)s, path = %(path)s completed in time = %(process_time)d with status code = %(status_code)d",
+            {
+                "method": request.method,
+                "path": request.url.path,
+                "process_time": process_time,
+                "code": response.status_code,
+            },
+        )
         return response
 
 

@@ -1,8 +1,7 @@
 from typing import Optional
 
-from redis.asyncio import Redis
-
 from core.config import settings
+from redis.asyncio import Redis
 
 # Переменная для хранения экземпляра Redis
 redis: Optional[Redis] = None

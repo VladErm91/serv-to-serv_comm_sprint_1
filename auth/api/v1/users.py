@@ -1,14 +1,13 @@
 import logging
+import time
 from uuid import UUID
-
-from fastapi import APIRouter, Depends, Header, HTTPException, status
-from prometheus_client import Counter
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.v1.role import is_admin
 from core.auth import get_current_user
 from db.db import get_session
+from fastapi import APIRouter, Depends, Header, HTTPException, status
 from models.user import User
+from prometheus_client import Counter, Histogram
 from repositories.password_repository import update_password
 from repositories.user_repository import (
     delete_user,
@@ -22,13 +21,15 @@ from schemas.user import UserCreate, UserOut, UserProfile, UserUpdate
 from services.token_service import decode_token, verify_old_password
 from services.user_activity_service import log_user_action
 from services.user_service import build_user_profile, register_user, update_user_profile
+from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-user_registration_counter = Counter(
-    "user_registration_total", "Total number of registered users"
+# Счётчик количества зарегистрированных пользователей
+user_operations_duration_seconds = Histogram(
+    "user_operations_duration_seconds", "User operation duration"
 )
 
 
@@ -38,6 +39,7 @@ async def register(
     user: UserCreate,
     db: AsyncSession = Depends(get_session),
 ):
+    start = time.time()
     # Проверка, существует ли уже пользователь с таким логином
     existing_user = await get_user_by_login(db, user.login)
     if existing_user:
@@ -47,9 +49,9 @@ async def register(
         )
 
     new_user = await register_user(db, user)
-    user_registration_counter.inc()
-    logger.info(f"User {new_user.login} registered successfully.")
 
+    logger.info(f"User {new_user.login} registered successfully.")
+    user_operations_duration_seconds.observe(time.time() - start)
     return new_user
 
 
@@ -91,7 +93,6 @@ async def change_password(
     authorization: str = Header(),
     db: AsyncSession = Depends(get_session),
 ):
-
     user_id = await decode_token(authorization)  # Проверка токена
     current_user = await get_user_by_id(db, user_id)  # Получение пользователя
     verify_old_password(
