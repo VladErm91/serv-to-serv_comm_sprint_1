@@ -132,7 +132,7 @@ class NotificationService:
                     "scheduled_time"
                 ].isoformat()
             logger.debug(f"Данные уведомления для rabbit {notification_dict}")
-            
+
             # Отправляем уведомление в очередь
             await rabbitmq_manager.send_to_queue(
                 settings.rabbitmq_queue, notification_dict

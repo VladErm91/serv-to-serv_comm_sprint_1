@@ -3,10 +3,9 @@ from uuid import UUID
 
 from async_fastapi_jwt_auth import AuthJWT
 from fastapi import APIRouter, HTTPException
+from models.history_auth import AuthenticationHistory
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-
-from models.history_auth import AuthenticationHistory
 
 router = APIRouter()
 

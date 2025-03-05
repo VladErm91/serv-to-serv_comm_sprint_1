@@ -19,12 +19,17 @@ async def process_queue_message(method, properties, body: bytes):
         notification_data = json.loads(body)
         user_message = process_notification(notification_data)
         queue_name = select_notification_queue(notification_data)
-        
+
         await rabbitmq_manager.send_to_queue(user_message, queue_name)
 
-        logger.info("Notification processed id = %(id)s", {"id": notification_data['id']})
+        logger.info(
+            "Notification processed id = %(id)s", {"id": notification_data["id"]}
+        )
     except Exception as e:
-        logger.error("Failed to process notification id = %(id)s: e =%(e)s", {"id": notification_data['id'], "e": e})
+        logger.error(
+            "Failed to process notification id = %(id)s: e =%(e)s",
+            {"id": notification_data["id"], "e": e},
+        )
         # Можно добавить повторную попытку или отправку в очередь ошибок
 
     except json.JSONDecodeError:

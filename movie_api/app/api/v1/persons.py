@@ -1,13 +1,20 @@
+import time
 from http import HTTPStatus
 from typing import List
 
 from core.jwt import security_jwt
 from fastapi import APIRouter, Depends, HTTPException, Query
 from models.person import FilmRating, PersonFilm
+from prometheus_client import Counter, Histogram
 from services.person import PersonService, get_person_service
 from typing_extensions import Annotated
 
 router = APIRouter()
+
+# Метрика по времени поиска персон
+persons_search_duration_seconds = Histogram(
+    "persons_search_duration_seconds", "Duration of person search requests"
+)
 
 
 @router.get(
@@ -21,11 +28,14 @@ async def persons_search(
     page_number: int = Query(default=1, description="Page number", gt=0, lt=1000),
     person_service: PersonService = Depends(get_person_service),
 ) -> List[PersonFilm]:
+    start = time.time()
     persons = await person_service.search(
         search_str=query,
         page_size=page_size,
         page_number=page_number,
     )
+    persons_search_duration_seconds.observe(time.time() - start)
+
     if not persons:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Person not found")
     return persons

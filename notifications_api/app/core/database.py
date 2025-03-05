@@ -3,10 +3,8 @@ import logging
 from uuid import UUID
 
 from bson import Binary
-from motor.motor_asyncio import AsyncIOMotorClient
-
 from core.config import settings
-
+from motor.motor_asyncio import AsyncIOMotorClient
 
 logger = logging.getLogger(__name__)
 

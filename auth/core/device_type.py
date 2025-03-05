@@ -1,6 +1,5 @@
-from user_agents import parse
-
 from core.config import DEVICES
+from user_agents import parse
 
 
 def get_device_type(user_agent: str) -> str:

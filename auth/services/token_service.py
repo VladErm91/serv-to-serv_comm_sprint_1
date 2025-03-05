@@ -1,11 +1,10 @@
 import logging
 from uuid import UUID
 
-from fastapi import HTTPException, status
-from jose import JWTError, jwt
-
 from core.config import settings
 from core.security import verify_password
+from fastapi import HTTPException, status
+from jose import JWTError, jwt
 from models.user import User
 from schemas.auth import ChangePassword
 

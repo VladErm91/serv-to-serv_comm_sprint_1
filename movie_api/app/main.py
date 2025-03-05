@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from api.v1 import films, genres, persons
 from core.config import settings
+from core.metrics import instrument_film_endpoints, instrument_person_endpoints
 from core.tracer import configure_tracer
 from db import elastic
 from db.redis import get_cache_service
@@ -57,7 +58,10 @@ if settings.enable_tracing:
     configure_tracer()
     # FastAPIInstrumentor.instrument_app(app)
 
-Instrumentator().instrument(app).expose(app)
+instrumentator = Instrumentator().instrument(app)
+instrumentator.add(instrument_person_endpoints())
+instrumentator.add(instrument_film_endpoints())
+instrumentator.expose(app)
 
 app.include_router(films.router, prefix="/api/v1/films", tags=["films"])
 app.include_router(persons.router, prefix="/api/v1/persons", tags=["persons"])

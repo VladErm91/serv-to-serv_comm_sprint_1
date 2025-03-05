@@ -37,9 +37,7 @@ class WebSocketConnectionManager:
         """
         websocket = self.active_connections.get(user_id)
         if websocket:
-            logger.info(
-                f"Отправка сообщения пользователю {user_id}: {message}"
-            )
+            logger.info(f"Отправка сообщения пользователю {user_id}: {message}")
             await websocket.send_text(message)
         else:
             logger.info(

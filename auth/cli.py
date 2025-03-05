@@ -2,13 +2,12 @@ import asyncio
 import datetime
 
 import typer
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-
 from core.security import get_password_hash
 from db.db import get_session
 from models.roles import Role
 from models.user import User
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 
 app = typer.Typer()
 

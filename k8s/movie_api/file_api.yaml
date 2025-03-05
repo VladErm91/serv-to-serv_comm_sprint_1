@@ -44,6 +44,9 @@ spec:
             httpGet:
               path: "/healthcheck"
               port: 8001
+              httpHeaders:
+                - name: "X-Request-Id"
+                  value: "test-request"
             initialDelaySeconds: 15
             periodSeconds: 30
             timeoutSeconds: 2

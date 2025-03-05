@@ -1,5 +1,6 @@
 import uuid
 
+from db.db import Base
 from sqlalchemy import (
     Boolean,
     Column,
@@ -11,8 +12,6 @@ from sqlalchemy import (
     text,
 )
 from sqlalchemy.dialects.postgresql import UUID
-
-from db.db import Base
 
 
 def create_partition(target, connection, **kw) -> None:

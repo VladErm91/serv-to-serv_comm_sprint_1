@@ -1,10 +1,9 @@
 import logging
 from uuid import UUID
 
-from httpx import AsyncClient, HTTPStatusError
-
-from utils.schemas import Notification, NotificationMessage, Template
 from core.config import settings
+from httpx import AsyncClient, HTTPStatusError
+from utils.schemas import Notification, NotificationMessage, Template
 
 logger = logging.getLogger(__name__)
 
@@ -73,7 +72,9 @@ def select_notification_queue(notification_data: Notification):
 
 def process_notification(notification_data: Notification):
     recipients = notification_data["recipients"]
-    logger.info("Processing notification for n = %(n)d recipients", {"n": len(recipients)})
+    logger.info(
+        "Processing notification for n = %(n)d recipients", {"n": len(recipients)}
+    )
     try:
         emails = []
         if len(recipients) > 1:
@@ -84,8 +85,11 @@ def process_notification(notification_data: Notification):
                     userdata, notification_data["delivery_type"]
                 ):
                     logger.info(
-                        "User username = %(username)s has disabled delivery_type =%(delivery_type)s notifications",  
-                        {"username": userdata["username"], "delivery_type": notification_data["delivery_type"]}
+                        "User username = %(username)s has disabled delivery_type =%(delivery_type)s notifications",
+                        {
+                            "username": userdata["username"],
+                            "delivery_type": notification_data["delivery_type"],
+                        },
                     )
             text = get_template_data(notification_data["template_id"])
         else:
@@ -94,8 +98,11 @@ def process_notification(notification_data: Notification):
                 userdata, notification_data["delivery_type"]
             ):
                 logger.info(
-                    "User username = %(username)s has disabled delivery_type =%(delivery_type)s notifications",  
-                    {"username": userdata["username"], "delivery_type": notification_data["delivery_type"]}
+                    "User username = %(username)s has disabled delivery_type =%(delivery_type)s notifications",
+                    {
+                        "username": userdata["username"],
+                        "delivery_type": notification_data["delivery_type"],
+                    },
                 )
             username = userdata["username"]
             emails.append(userdata["email"])

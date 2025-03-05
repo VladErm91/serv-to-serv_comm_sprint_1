@@ -3,7 +3,6 @@ import json
 import logging
 
 from aio_pika import Channel, Message, RobustConnection, connect
-
 from core.config import settings
 
 logger = logging.getLogger(__name__)

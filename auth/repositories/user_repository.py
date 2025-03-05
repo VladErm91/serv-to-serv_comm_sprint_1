@@ -1,9 +1,8 @@
 from uuid import UUID
 
+from models.user import User, UserActionHistory
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-
-from models.user import User, UserActionHistory
 
 
 async def get_user_by_login(db: AsyncSession, login: str) -> User:

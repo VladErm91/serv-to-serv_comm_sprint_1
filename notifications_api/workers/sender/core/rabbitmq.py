@@ -4,7 +4,6 @@ import logging
 
 from aio_pika import Channel, Message, RobustConnection, connect_robust
 from aio_pika.exceptions import AMQPConnectionError
-
 from core.settings import settings
 
 logger = logging.getLogger(__name__)
@@ -31,9 +30,7 @@ class RabbitMQConnectionManager:
 
             queue = await self.channel.declare_queue(name=queue_name, durable=True)
 
-            logger.info(
-                "Очередь объявлена, начинаем прослушивание сообщений..."
-            )
+            logger.info("Очередь объявлена, начинаем прослушивание сообщений...")
 
             async with queue.iterator() as queue_iter:
                 async for message in queue_iter:

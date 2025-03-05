@@ -5,13 +5,12 @@ from uuid import UUID
 
 from core.database import get_mongo_db
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from motor.motor_asyncio import AsyncIOMotorClient
-
 from models.notification import (
     NotificationRequest,
     NotificationStatus,
     UserNotificationResponse,
 )
+from motor.motor_asyncio import AsyncIOMotorClient
 from services.notification_service import NotificationService
 
 router = APIRouter()
@@ -86,7 +85,10 @@ async def get_user_notifications(
         )
 
     except Exception as e:
-        logger.error("Error fetching notifications for user user_id = %(user_id)s: e = %(e)s", {"user_id": user_id, "e": e})
+        logger.error(
+            "Error fetching notifications for user user_id = %(user_id)s: e = %(e)s",
+            {"user_id": user_id, "e": e},
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to fetch notifications",

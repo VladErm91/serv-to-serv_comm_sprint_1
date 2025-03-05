@@ -1,10 +1,12 @@
 import datetime
+import time
 from http import HTTPStatus
 from typing import List, Optional
 
 from core.jwt import security_jwt
 from fastapi import APIRouter, Depends, HTTPException, Query
 from models.film import Film, FilmDetailed
+from prometheus_client import Histogram
 from services.film import (
     FilmService,
     MultipleFilmsService,
@@ -20,6 +22,14 @@ THREE_YEARS_AGO = datetime.datetime.now(datetime.timezone.utc) - datetime.timede
 
 # Объект router, в котором регистрируем обработчики
 router = APIRouter()
+
+# Метрики по запросам наиболее популярных фильмов
+film_popular_duration_seconds = Histogram(
+    "film_popular_duration_seconds", "Duration of popular films requests"
+)
+film_search_duration_seconds = Histogram(
+    "film_search_duration_seconds", "Duration of film search requests"
+)
 
 
 @router.get(
@@ -38,6 +48,7 @@ async def get_popular_films(
     page_number: int = Query(1, description="Page number", ge=1),
     film_service: MultipleFilmsService = Depends(get_multiple_films_service),
 ):
+    start = time.time()
     valid_sort_fields = ("imdb_rating", "-imdb_rating")
     if sort not in valid_sort_fields:
         raise HTTPException(
@@ -49,7 +60,7 @@ async def get_popular_films(
 
     # Adjust query filters based on authorization
     release_date_cutoff = None if user else THREE_YEARS_AGO
-    return await film_service.get_multiple_films(
+    popular_films = await film_service.get_multiple_films(
         similar=similar,
         genre=genre,
         desc_order=desc,
@@ -57,6 +68,8 @@ async def get_popular_films(
         page_number=page_number,
         release_date_cutoff=release_date_cutoff,
     )
+    film_popular_duration_seconds.observe(time.time() - start)
+    return popular_films
 
 
 # 3. Поиск по фильмам (2.1. из т.з.)
@@ -76,12 +89,15 @@ async def fulltext_search_filmworks(
     page_number: int = Query(1, description="Page number", ge=1),
     pop_film_service: MultipleFilmsService = Depends(get_multiple_films_service),
 ) -> List[Film]:
+    start = time.time()
 
-    return await pop_film_service.search_films(
+    search_films = await pop_film_service.search_films(
         query,
         page_number,
         page_size,
     )
+    film_search_duration_seconds.observe(time.time() - start)
+    return search_films
 
 
 # 4. Полная информация по фильму (т.з. 3.1.)
@@ -99,6 +115,7 @@ async def film_details(
     film_uuid: str,
     film_service: FilmService = Depends(get_film_service),
 ) -> FilmDetailed:
+
     film = await film_service.get_by_uuid(film_uuid)
     if not film:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail="Film not found")

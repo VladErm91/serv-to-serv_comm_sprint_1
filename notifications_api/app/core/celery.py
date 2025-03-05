@@ -2,7 +2,6 @@
 import logging
 
 from celery import Celery
-
 from core.config import settings
 from services.notification_service import process_notification
 

@@ -1,5 +1,4 @@
 from celery import Celery
-
 from core.config import settings
 
 # Создаём экземпляр Celery-приложения
