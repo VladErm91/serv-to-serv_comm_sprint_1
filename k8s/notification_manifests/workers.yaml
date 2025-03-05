@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-worker
+  template:
+    metadata:
+      labels:
+        app: notification-worker
+    spec:
+      containers:
+        - name: notification-worker
+          image: notification-worker:latest
+          envFrom:
+            - configMapRef:
+                name: notification-config
+          imagePullPolicy: Never
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: event-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: event-worker
+  template:
+    metadata:
+      labels:
+        app: event-worker
+    spec:
+      containers:
+        - name: event-worker
+          image: notification-event-worker:latest
+          envFrom:
+            - configMapRef:
+                name: notification-config
+          imagePullPolicy: Never
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scheduled-celery-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scheduled-celery-worker
+  template:
+    metadata:
+      labels:
+        app: scheduled-celery-worker
+    spec:
+      containers:
+        - name: scheduled-celery-worker
+          image: notification-scheduled-celery-worker:latest
+          envFrom:
+            - configMapRef:
+                name: notification-config
+          imagePullPolicy: Never
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scheduled-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scheduled-worker
+  template:
+    metadata:
+      labels:
+        app: scheduled-worker
+    spec:
+      containers:
+        - name: scheduled-worker
+          image: notification-scheduled-worker:latest
+          envFrom:
+            - configMapRef:
+                name: notification-config
+          imagePullPolicy: Never

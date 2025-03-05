@@ -14,16 +14,22 @@ spec:
     spec:
       containers:
         - name: notification-api
-          image: notification_api:latest
+          image: notifications-api:latest
           envFrom:
             - configMapRef:
                 name: notification-config
           ports:
             - containerPort: 8765
-          volumeMounts:
-            - name: app-storage
-              mountPath: /app
-      volumes:
-        - name: app-storage
-          hostPath:
-            path: ./app
+          imagePullPolicy: Never
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-api
+spec:
+  selector:
+    app: notification-api
+  ports:
+    - protocol: TCP
+      port: 8765
+      targetPort: 8765

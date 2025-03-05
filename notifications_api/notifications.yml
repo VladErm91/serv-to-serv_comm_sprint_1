@@ -116,6 +116,7 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+
   websender:
     build:
       context: ./workers/push_notifications

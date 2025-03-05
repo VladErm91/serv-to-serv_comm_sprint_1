@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mailhog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mailhog
+  template:
+    metadata:
+      labels:
+        app: mailhog
+    spec:
+      containers:
+        - name: mailhog
+          image: mailhog/mailhog:latest
+          ports:
+            - containerPort: 1025  # SMTP-порт для приема почты
+            - containerPort: 8025  # Веб-интерфейс для просмотра писем
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mailhog
+spec:
+  selector:
+    app: mailhog
+  ports:
+    - name: smtp
+      protocol: TCP
+      port: 1025   # SMTP порт для отправки почты
+      targetPort: 1025
+    - name: web
+      protocol: TCP
+      port: 8025   # Web UI для просмотра писем
+      targetPort: 8025
+  type: NodePort  # Делаем сервис доступным снаружи (можно поменять на LoadBalancer)
