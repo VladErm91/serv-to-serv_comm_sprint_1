@@ -12,6 +12,10 @@ spec:
       labels:
         app: notification-api
     spec:
+      initContainers:
+        - name: wait-for-rabbitmq
+          image: busybox
+          command: ['sh', '-c', 'until nc -z rabbitmq 5672; do echo waiting for rabbitmq...; sleep 2; done;']
       containers:
         - name: notification-api
           image: notifications-api:latest
