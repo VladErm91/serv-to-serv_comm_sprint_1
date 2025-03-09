@@ -10,6 +10,7 @@ from core.logger import setup_logging
 from core.rabbitmq import rabbitmq_manager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from prometheus_fastapi_instrumentator import Instrumentator
 
 # Настройка логирования
 setup_logging()
@@ -62,3 +63,5 @@ setup_middleware(app)
 
 # Подключение роутеров
 app.include_router(api_router, prefix="/api/notifications_api/v1")
+# Подключаем инструментатор
+Instrumentator().instrument(app).expose(app, endpoint="/metrics")

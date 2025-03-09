@@ -87,3 +87,15 @@ mailhog
 ```bash
 kubectl apply -f k8s/notification_manifests/mailhog.yaml
 ```
+
+Получить расширенную информацию о запущенных подах по всем namespaces
+
+```bash
+kubectl get pods --all-namespaces -o wide
+```
+
+Подключиться к дашборду grafana
+
+```bash
+minikube service grafana --url -n monitoring
+```

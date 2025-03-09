@@ -18,7 +18,7 @@ spec:
           command: ['sh', '-c', 'until nc -z rabbitmq 5672; do echo waiting for rabbitmq...; sleep 2; done;']
       containers:
         - name: notification-api
-          image: notifications-api:latest
+          image: notification-api:latest
           envFrom:
             - configMapRef:
                 name: notification-config
