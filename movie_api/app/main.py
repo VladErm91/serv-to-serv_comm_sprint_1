@@ -1,16 +1,17 @@
 from contextlib import asynccontextmanager
 
+from elasticsearch import AsyncElasticsearch
+from fastapi import FastAPI, Request, status
+from fastapi.responses import ORJSONResponse
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from prometheus_fastapi_instrumentator import Instrumentator
+
 from api.v1 import films, genres, persons
 from core.config import settings
 from core.metrics import instrument_film_endpoints, instrument_person_endpoints
 from core.tracer import configure_tracer
 from db import elastic
 from db.redis import get_cache_service
-from elasticsearch import AsyncElasticsearch
-from fastapi import FastAPI, Request, status
-from fastapi.responses import ORJSONResponse
-from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-from prometheus_fastapi_instrumentator import Instrumentator
 
 
 @asynccontextmanager

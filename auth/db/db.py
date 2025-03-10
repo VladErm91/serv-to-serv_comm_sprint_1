@@ -1,9 +1,10 @@
 import logging
 from typing import Any
 
-from core.config import settings
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
+
+from core.config import settings
 
 # взял за основу файл из FileAPI возможно его нужно будет дорабатывать
 Base = declarative_base()

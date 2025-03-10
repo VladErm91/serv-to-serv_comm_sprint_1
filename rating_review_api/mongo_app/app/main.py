@@ -6,6 +6,7 @@ from core.config import settings
 from core.logger import LOGGING
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
+from prometheus_fastapi_instrumentator import Instrumentator
 
 sentry_sdk.init(
     dsn=settings.sentry_dsn,
@@ -21,6 +22,13 @@ app = FastAPI(
     openapi_url="/api/rating_review_api/openapi.json",
     default_response_class=ORJSONResponse,
 )
+
+instrumentator = Instrumentator().instrument(app)
+# instrumentator.add(instrument_movies_endpoints())
+# instrumentator.add(instrument_likes_endpoints())
+# instrumentator.add(instrument_reviews_endpoints())
+# instrumentator.add(instrument_bookmarks_endpoints())
+instrumentator.expose(app)
 
 
 @app.get("/sentry-debug")
@@ -44,6 +52,12 @@ app.include_router(
 app.include_router(
     bookmarks.router, prefix="/api/rating_review_api/v1/bookmarks", tags=["bookmarks"]
 )
+
+
+# Эндпойнт для проверки состояния приложения
+@app.get("/healthcheck")
+async def health_check():
+    return {"status": "OK"}
 
 
 if __name__ == "__main__":

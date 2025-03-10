@@ -10,6 +10,7 @@ spec:
   hostPath:
     path: /mnt/data/grafana
 ---
+
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:

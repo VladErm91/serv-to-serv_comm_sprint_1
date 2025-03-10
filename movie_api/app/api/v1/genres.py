@@ -1,11 +1,12 @@
 from http import HTTPStatus
 from typing import Optional
 
-from core.jwt import security_jwt
 from fastapi import APIRouter, Depends, HTTPException, Query
+from typing_extensions import Annotated
+
+from core.jwt import security_jwt
 from models.genre import Genre, GenrePaginationResponse, SortOrder
 from services.genre import GenreService, get_genre_service
-from typing_extensions import Annotated
 
 router = APIRouter()
 

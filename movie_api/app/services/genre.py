@@ -2,11 +2,12 @@ import json
 from functools import lru_cache
 from typing import List, Optional, Tuple
 
+from elasticsearch import NotFoundError
+from fastapi import Depends, HTTPException
+
 from db.elastic import get_search_engine
 from db.interfaces import AsyncCache, AsyncSearchEngine
 from db.redis import get_cache_service
-from elasticsearch import NotFoundError
-from fastapi import Depends, HTTPException
 from models.genre import Genre
 from services.base_service import BaseService
 

@@ -1,11 +1,13 @@
 from functools import lru_cache
 from typing import List
 
+from elasticsearch import NotFoundError
+from fastapi import Depends
+from pydantic import TypeAdapter
+
 from db.elastic import get_search_engine
 from db.interfaces import AsyncCache, AsyncSearchEngine
 from db.redis import get_cache_service
-from elasticsearch import NotFoundError
-from fastapi import Depends
 from models.person import (
     FilmRating,
     PersonFilm,
@@ -13,7 +15,6 @@ from models.person import (
     PersonWithFilms,
     PortfolioFilm,
 )
-from pydantic import TypeAdapter
 from services.base_service import BaseService
 
 PERSONFILM_ADAPTER = TypeAdapter(PersonFilm)

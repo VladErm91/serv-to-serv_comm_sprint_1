@@ -3,17 +3,17 @@ import time
 from http import HTTPStatus
 from typing import List, Optional
 
-from core.jwt import security_jwt
 from fastapi import APIRouter, Depends, HTTPException, Query
+from typing_extensions import Annotated
+
+from core.jwt import security_jwt
 from models.film import Film, FilmDetailed
-from prometheus_client import Histogram
 from services.film import (
     FilmService,
     MultipleFilmsService,
     get_film_service,
     get_multiple_films_service,
 )
-from typing_extensions import Annotated
 
 # Define the cutoff date for unauthorized users
 THREE_YEARS_AGO = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(
@@ -22,14 +22,6 @@ THREE_YEARS_AGO = datetime.datetime.now(datetime.timezone.utc) - datetime.timede
 
 # Объект router, в котором регистрируем обработчики
 router = APIRouter()
-
-# Метрики по запросам наиболее популярных фильмов
-film_popular_duration_seconds = Histogram(
-    "film_popular_duration_seconds", "Duration of popular films requests"
-)
-film_search_duration_seconds = Histogram(
-    "film_search_duration_seconds", "Duration of film search requests"
-)
 
 
 @router.get(
@@ -48,7 +40,6 @@ async def get_popular_films(
     page_number: int = Query(1, description="Page number", ge=1),
     film_service: MultipleFilmsService = Depends(get_multiple_films_service),
 ):
-    start = time.time()
     valid_sort_fields = ("imdb_rating", "-imdb_rating")
     if sort not in valid_sort_fields:
         raise HTTPException(
@@ -68,7 +59,6 @@ async def get_popular_films(
         page_number=page_number,
         release_date_cutoff=release_date_cutoff,
     )
-    film_popular_duration_seconds.observe(time.time() - start)
     return popular_films
 
 
@@ -89,14 +79,12 @@ async def fulltext_search_filmworks(
     page_number: int = Query(1, description="Page number", ge=1),
     pop_film_service: MultipleFilmsService = Depends(get_multiple_films_service),
 ) -> List[Film]:
-    start = time.time()
 
     search_films = await pop_film_service.search_films(
         query,
         page_number,
         page_size,
     )
-    film_search_duration_seconds.observe(time.time() - start)
     return search_films
 
 

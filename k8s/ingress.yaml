@@ -46,6 +46,20 @@ spec:
             name: file-api-service
             port:
               number: 8001
+      - path: /api/rating_review_api
+        pathType: Prefix
+        backend:
+          service:
+            name: rating-review-api
+            port:
+              number: 8765
+      - path: /v1/track_event
+        pathType: Prefix
+        backend:
+          service:
+            name: flask-kafka-web
+            port:
+              number: 8002
       - path: /
         pathType: Prefix
         backend:
@@ -54,17 +68,6 @@ spec:
             port:
               number: 8000
 ---
-              
-  # - host: minio.movie-api.local
-  #   http:
-  #     paths:
-  #     - path: /
-  #       pathType: Prefix
-  #       backend:
-  #         service:
-  #           name: minio
-  #           port:
-  #             number: 9000
 
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -91,3 +94,46 @@ spec:
                 name: minio
                 port:
                   number: 9000
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kafka-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: kafka-ui.local
+      http:
+        paths:
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: kafka-ui
+              port:
+                number: 8080
+---
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kibana-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/proxy-body-size: "50m"  # Если загружаются файлы
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: kibana.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: kibana
+                port:
+                  number: 5601
+---

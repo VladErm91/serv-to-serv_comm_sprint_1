@@ -18,12 +18,12 @@ data:
 
     receivers:
       - name: email-receiver
-    email_configs:
-      - to: "${ALERT_EMAIL_TO}"
-        from: "${ALERT_EMAIL_FROM}"
-        smarthost: "${ALERT_EMAIL_SMARTHOST}"
-        auth_username: "${ALERT_EMAIL_USERNAME}"
-        auth_password: "${ALERT_EMAIL_PASSWORD}"
+        email_configs:
+          - to: "${ALERT_EMAIL_TO}"
+            from: "${ALERT_EMAIL_FROM}"
+            smarthost: "${ALERT_EMAIL_SMARTHOST}"
+            auth_username: "${ALERT_EMAIL_USERNAME}"
+            auth_password: "${ALERT_EMAIL_PASSWORD}"
 
       - name: telegram-receiver
         webhook_configs:

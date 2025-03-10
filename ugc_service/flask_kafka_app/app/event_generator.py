@@ -8,7 +8,8 @@ from datetime import datetime
 
 import httpx
 
-API_URL = "http://localhost:8000/v1"  # URL приложения Flask
+#API_URL = "http://localhost:8002/v1"  # URL приложения Flask
+API_URL = "http://movie-api.local/v1"
 USER_IDS = [
     "8e9e106e-ad52-479c-8e2c-a2cb7dee5a07",
     "8147aede-0457-4283-bd0f-880536bac87d",

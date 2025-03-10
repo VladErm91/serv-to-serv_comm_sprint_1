@@ -5,15 +5,16 @@ from http import HTTPStatus
 from pprint import pformat
 from typing import Optional
 
+from elasticsearch import NotFoundError
+from fastapi import Depends, HTTPException
+from pydantic import TypeAdapter
+
 from core.config import settings
 from db.elastic import get_search_engine
 from db.interfaces import AsyncCache, AsyncSearchEngine
 from db.redis import get_cache_service
-from elasticsearch import NotFoundError
-from fastapi import Depends, HTTPException
 from models.film import Film, FilmDetailed
 from models.genre import Genre
-from pydantic import TypeAdapter
 from services.base_service import BaseService
 
 FILM_ADAPTER = TypeAdapter(list[Film])

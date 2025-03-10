@@ -1,7 +1,7 @@
 import re
 from typing import Callable
 
-from prometheus_client import Counter
+from prometheus_client import Counter, Histogram
 from prometheus_fastapi_instrumentator.metrics import Info
 
 # Счётчики для запросов к эндпоинтам фильмов
@@ -17,6 +17,12 @@ film_5xx_errors_total = Counter(
     ["endpoint", "method", "status_code"],
 )
 
+film_request_duration_seconds = Histogram(
+    "likes_request_duration_seconds",
+    "Duration of like requests",
+    ["endpoint", "method"],
+)
+
 # Счётчики для запросов к персональным эндпоинтам
 person_requests_total = Counter(
     "person_requests_total",
@@ -28,6 +34,12 @@ person_5xx_errors_total = Counter(
     "person_5xx_errors_total",
     "Total number of 5xx errors for person endpoints",
     ["endpoint", "method", "status_code"],
+)
+
+person_request_duration_seconds = Histogram(
+    "likes_request_duration_seconds",
+    "Duration of like requests",
+    ["endpoint", "method"],
 )
 
 
@@ -54,6 +66,11 @@ def instrument_person_endpoints() -> Callable[[Info], None]:
             person_requests_total.labels(
                 endpoint=matched_endpoint, method=info.request.method
             ).inc()
+
+            # Засекаем время выполнения
+            person_request_duration_seconds.labels(
+                endpoint=matched_endpoint, method=info.request.method
+            ).observe(info.modified_duration)
 
             # Счётчик 5xx ошибок, если есть
             if 500 <= info.response.status_code < 600:
@@ -91,6 +108,11 @@ def instrument_film_endpoints() -> Callable[[Info], None]:
             film_requests_total.labels(
                 endpoint=matched_endpoint, method=info.request.method
             ).inc()
+
+            # Засекаем время выполнения
+            film_request_duration_seconds.labels(
+                endpoint=matched_endpoint, method=info.request.method
+            ).observe(info.modified_duration)
 
             # Считаем ошибки 5xx, если есть
             if 500 <= info.response.status_code < 600:

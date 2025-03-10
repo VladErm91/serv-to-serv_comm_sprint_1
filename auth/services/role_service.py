@@ -2,12 +2,13 @@ from typing import List
 from uuid import UUID
 
 from fastapi import HTTPException, status
-from models.roles import Role
-from models.user import User
-from schemas.roles import RoleCreateRequest, RoleUpdateRequest
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
+
+from models.roles import Role
+from models.user import User
+from schemas.roles import RoleCreateRequest, RoleUpdateRequest
 
 
 class RoleService:

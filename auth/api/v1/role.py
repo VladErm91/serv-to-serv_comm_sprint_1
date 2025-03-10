@@ -1,13 +1,14 @@
 from typing import List
 from uuid import UUID
 
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from core.auth import get_current_user
 from db.db import get_session
-from fastapi import APIRouter, Depends, HTTPException, status
 from models.user import User
 from schemas.roles import RoleCreateRequest, RoleResponse, RoleUpdateRequest
 from services.role_service import RoleService
-from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter()
 

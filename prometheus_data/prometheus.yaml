@@ -108,6 +108,20 @@ data:
         metrics_path: /metrics
         static_configs:
           - targets: ['file-api-service.default.svc.cluster.local:8001']
+
+      - job_name: 'ugc-service'
+        scrape_interval: 15s
+        scrape_timeout: 10s
+        metrics_path: /metrics
+        static_configs:
+          - targets: ['flask-kafka-web.default.svc.cluster.local:8002']
+
+      - job_name: 'rating-review-service'
+        scrape_interval: 15s
+        scrape_timeout: 10s
+        metrics_path: /metrics
+        static_configs:
+          - targets: ['rating-review-api.default.svc.cluster.local:8765']
 ---
 
 apiVersion: v1
