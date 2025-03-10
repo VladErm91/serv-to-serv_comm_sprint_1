@@ -60,6 +60,19 @@ class RabbitMQConnectionManager:
         except Exception as e:
             logger.error(f"Failed to send message to RabbitMQ: {e}")
             raise
+    
+    async def health_check(self) -> bool:
+        """
+        Проверяет доступность RabbitMQ.
+        """
+        if not self.channel:
+            return False
+        try:
+            await self.channel.declare_queue("healthcheck", durable=False)
+            return True
+        except Exception as e:
+            logger.error(f"RabbitMQ health check failed: {e}")
+            return False
 
 
 # Инициализация менеджера подключения

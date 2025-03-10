@@ -112,3 +112,17 @@ async def get_user_notifications(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to fetch notifications",
         )
+
+
+@router.get("/health", tags=["health"])
+async def health_check():
+    """Проверка работоспособности API"""
+    return {"status": "ok"}
+
+
+@router.get("/ready", tags=["health"])
+async def readiness_check(service: NotificationService = Depends(get_notification_service)):
+    """Проверяет доступность зависимостей (например, RabbitMQ и MongoDB)"""
+    if await service.check_dependencies():
+        return {"status": "ready"}
+    return {"status": "not ready"}, 503
