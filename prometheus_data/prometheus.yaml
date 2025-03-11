@@ -108,6 +108,11 @@ data:
         metrics_path: /metrics
         static_configs:
           - targets: ['file-api-service.default.svc.cluster.local:8001']
+      
+      - job_name: 'notification-api'
+        metrics_path: '/metrics'
+        static_configs:
+          - targets: ['notification-api.default.svc.cluster.local:8765']
 ---
 
 apiVersion: v1
