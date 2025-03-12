@@ -62,6 +62,12 @@ spec:
             periodSeconds: 30
             timeoutSeconds: 2
             failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: "/admin"
+              port: 8081
+            initialDelaySeconds: 15
+            periodSeconds: 30
           volumeMounts:
             - mountPath: "/data/static"
               name: staticfiles

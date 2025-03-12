@@ -33,6 +33,13 @@ rabbitmq
 kubectl apply -f k8s/notification_manifests/rabbitmq.yaml
 ```
 
+celery_worker
+
+```bash
+docker build -t celery-worker:latest -f django_admin/app/Dockerfile.celery django_admin/app
+kubectl apply -f k8s/notification_manifests/workers.yaml
+```
+
 notification-api
 
 ```bash

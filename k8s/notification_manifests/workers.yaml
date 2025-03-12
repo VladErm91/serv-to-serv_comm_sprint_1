@@ -88,3 +88,42 @@ spec:
             - configMapRef:
                 name: notification-config
           imagePullPolicy: Never
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: celery-worker
+  template:
+    metadata:
+      labels:
+        app: celery-worker
+    spec:
+      initContainers:
+        - name: wait-for-rabbitmq
+          image: busybox
+          command: ['sh', '-c', 'until nc -z rabbitmq 5672; do echo waiting for rabbitmq...; sleep 2; done;']
+        - name: wait-for-redis
+          image: busybox
+          command: ['sh', '-c', 'until nc -z redis 6379; do echo waiting for redis...; sleep 2; done;']
+        - name: wait-for-django
+          image: busybox
+          command: ['sh', '-c', 'until nc -z django-admin-service 8081; do echo waiting for django...; sleep 2; done;']
+      containers:
+        - name: celery-worker
+          image: celery-worker:latest
+          imagePullPolicy: Never
+          command: ["celery", "-A", "config", "worker", "--loglevel=info", "--concurrency=4", "--max-tasks-per-child=100"]
+          envFrom:
+            - configMapRef:
+                name: notification-config
+          readinessProbe:
+            exec:
+              command: ["celery", "-A", "config", "inspect", "ping"]
+            initialDelaySeconds: 10
+            periodSeconds: 15
