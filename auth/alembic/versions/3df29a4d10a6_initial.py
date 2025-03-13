@@ -113,6 +113,7 @@ def upgrade() -> None:
             "created", sa.DateTime(), nullable=True, server_default=sa.func.now()
         ),
         schema="content",
+        if_not_exists=True,
     )
     op.create_index("ix_users_email", "users", ["email"], unique=True)
     op.create_table(
@@ -160,6 +161,7 @@ def upgrade() -> None:
             autoincrement=False,
             nullable=False,
         ),
+        if_not_exists=True,
     )
     op.create_table(
         "users_auth_in_smart",
@@ -189,6 +191,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint(
             "id", "user_device_type", name="users_auth_in_smart_pkey"
         ),
+        if_not_exists=True,
     )
     op.create_table(
         "roles",
@@ -200,6 +203,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id", name="roles_pkey"),
         sa.UniqueConstraint("name", name="roles_name_key"),
         postgresql_ignore_search_path=False,
+        if_not_exists=True,
     )
     op.create_table(
         "user_action_history",
@@ -215,6 +219,7 @@ def upgrade() -> None:
             ["user_id"], ["users.id"], name="user_action_history_user_id_fkey"
         ),
         sa.PrimaryKeyConstraint("id", name="user_action_history_pkey"),
+        if_not_exists=True,
     )
     op.create_table(
         "user_roles",
@@ -231,6 +236,7 @@ def upgrade() -> None:
             ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint("id", name="user_roles_pkey"),
+        if_not_exists=True,
     )
     op.create_table(
         "history_auth",
@@ -272,6 +278,7 @@ def upgrade() -> None:
             ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint("id", "user_device_type", name="history_auth_pkey"),
+        if_not_exists=True,
     )
     op.create_table(
         "users_auth_in_web",
@@ -301,6 +308,7 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint(
             "id", "user_device_type", name="users_auth_in_web_pkey"
         ),
+        if_not_exists=True,
     )
     op.create_table(
         "users_auth_in_mobile",
@@ -330,5 +338,6 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint(
             "id", "user_device_type", name="users_auth_in_mobile_pkey"
         ),
+        if_not_exists=True,
     )
     # ### end Alembic commands ###

@@ -11,6 +11,10 @@ auth_requests_total = Counter(
     ["endpoint", "method"],
 )
 
+auth_requests_total.labels(endpoint="/login", method="POST")
+auth_requests_total.labels(endpoint="/refresh-token", method="POST")
+auth_requests_total.labels(endpoint="/social/login", method="GET")
+
 # Счётчик всех ошибок 5xx для авторизационных эндпоинтов
 auth_5xx_errors_total = Counter(
     "auth_5xx_errors_total",
@@ -18,11 +22,23 @@ auth_5xx_errors_total = Counter(
     ["endpoint", "method", "status_code"],
 )
 
+auth_5xx_errors_total.labels(endpoint="/login", method="POST", status_code="500").inc()
+auth_5xx_errors_total.labels(
+    endpoint="/refresh-token", method="POST", status_code="500"
+).inc()
+auth_5xx_errors_total.labels(
+    endpoint="/social/login", method="GET", status_code="500"
+).inc()
+
 auth_request_duration_seconds = Histogram(
-    "likes_request_duration_seconds",
-    "Duration of like requests",
+    "auth_request_duration_seconds",
+    "Duration of auth requests",
     ["endpoint", "method"],
 )
+
+auth_request_duration_seconds.labels(endpoint="/login", method="POST")
+auth_request_duration_seconds.labels(endpoint="/refresh-token", method="POST")
+auth_request_duration_seconds.labels(endpoint="/social/login", method="GET")
 
 # Общее количество запросов к пользовательским эндпоинтам
 user_requests_total = Counter(
@@ -31,6 +47,10 @@ user_requests_total = Counter(
     ["endpoint", "method"],
 )
 
+user_requests_total.labels(endpoint="/register", method="POST")
+user_requests_total.labels(endpoint="/change-password", method="POST")
+user_requests_total.labels(endpoint="/users/{user_id}", method="GET")
+
 # Счётчик всех ошибок 5xx для пользовательских эндпоинтов
 user_5xx_errors_total = Counter(
     "user_5xx_errors_total",
@@ -38,14 +58,28 @@ user_5xx_errors_total = Counter(
     ["endpoint", "method", "status_code"],
 )
 
+user_5xx_errors_total.labels(
+    endpoint="/register/", method="POST", status_code="500"
+).inc()
+user_5xx_errors_total.labels(
+    endpoint="/change-password/", method="POST", status_code="500"
+).inc()
+user_5xx_errors_total.labels(
+    endpoint="/users/{user_id}", method="GET", status_code="500"
+).inc()
+
 user_request_duration_seconds = Histogram(
-    "likes_request_duration_seconds",
-    "Duration of like requests",
+    "user_request_duration_seconds",
+    "Duration of user-related requests",
     ["endpoint", "method"],
 )
 
+user_request_duration_seconds.labels(endpoint="/register/", method="POST")
+user_request_duration_seconds.labels(endpoint="/change-password/", method="POST")
+user_request_duration_seconds.labels(endpoint="/users/{user_id}", method="GET")
 
-def instrument_auth_endpoints() -> Callable[[Info], None]:
+
+def instrument_auth() -> Callable[[Info], None]:
     def instrumentation(info: Info) -> None:
         auth_endpoints = [
             "/login",
@@ -66,6 +100,7 @@ def instrument_auth_endpoints() -> Callable[[Info], None]:
             auth_request_duration_seconds.labels(
                 endpoint=endpoint, method=method
             ).observe(info.modified_duration)
+
             # Если статус-код 5xx — увеличиваем отдельный счётчик
             if 500 <= info.response.status_code < 600:
                 auth_5xx_errors_total.labels(
@@ -77,7 +112,7 @@ def instrument_auth_endpoints() -> Callable[[Info], None]:
     return instrumentation
 
 
-def instrument_user_endpoints() -> Callable[[Info], None]:
+def instrument_user() -> Callable[[Info], None]:
     def instrumentation(info: Info) -> None:
         # Список эндпоинтов
         user_endpoint_patterns = {
@@ -86,7 +121,7 @@ def instrument_user_endpoints() -> Callable[[Info], None]:
             "/users/{user_id}": re.compile(r"^/users/[^/]+$"),
         }
 
-        if info.request.method not in ["GET", "POST", "PATCH", "DELETE"]:
+        if info.request.method not in ["GET", "POST", "PATCH"]:
             return
 
         matched_endpoint = None
