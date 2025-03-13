@@ -1,0 +1,28 @@
+name: "post-service-filebeat"
+logging.metrics.enabled: false
+xpack.security.enabled: false
+xpack.monitoring.enabled: false
+
+
+ilebeat.inputs:
+- type: filestream
+  scan_frequency: 1s
+  enabled: true
+  paths:
+    - /var/log/nginx/*
+  json:
+    keys_under_root: true
+    add_error_key: true
+
+  processors:
+    - decode_json_fields:
+        fields: ["message"]
+        process_array: false
+        max_depth: 2
+        target: ""
+        overwrite_keys: true
+        add_error_key: false
+
+output.logstash:
+  enabled: true
+  hosts: ["logstash:5045"]

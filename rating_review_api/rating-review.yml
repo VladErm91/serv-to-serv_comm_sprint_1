@@ -1,0 +1,102 @@
+services:
+  # ---- api для mongo пользвательских закладок, лайков/дизлайков, рецензий  ----
+  rating_review_api:
+    build: ./mongo_app/app
+    expose:
+      - "8765"
+    depends_on:
+      - auth
+      - logstash
+      - kibana
+      - mongodb
+    env_file:
+      - .env 
+    logging:
+      driver: gelf
+      options:
+        gelf-address: udp://127.0.0.1:5044
+        tag: rating_review_api
+
+  filebeat:
+      image: elastic/filebeat:8.10.2
+      volumes:
+        - /tmp/logs/nginx:/var/log/nginx:ro
+        - ./utils/filebeat.yml:/usr/share/filebeat/filebeat.yml
+      command: filebeat -e -strict.perms=false
+      depends_on:
+        - rating_review_api
+        - logstash
+        - elastic-logs
+        - kibana
+      links:
+        - logstash
+
+  mongodb:
+    image: mongo
+    ports:
+      - 27017:27017
+    logging:
+      driver: gelf
+      options:
+        gelf-address: udp://127.0.0.1:5044
+        tag: mongodb_container
+    depends_on:
+      - logstash
+      - kibana
+    volumes:
+      - ./mongodb/data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  # ELK
+  logstash:
+    image: logstash:8.10.2
+    environment:
+      XPACK_MONITORING_ENABLED: "false"
+      ES_HOST: "elastic-logs:9200"
+    ports:
+      - "5044:5044/udp"
+    expose:
+      - "5044/udp"
+    volumes:
+      - ./utils/logstash.conf:/config/logstash.conf:ro
+    command: logstash -f /config/logstash.conf
+    depends_on:
+      - elastic-logs
+
+  kibana:
+    image: kibana:8.10.2
+    ports:
+      - "5601:5601"
+    depends_on:
+      - logstash
+      - elastic-logs
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elastic-logs:9200
+
+  elastic-logs:
+    image: elasticsearch:8.10.2
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ingest.geoip.downloader.enabled=false
+      - ES_JAVA_OPTS=-Xms3g -Xmx3g
+    ports:
+      - "9200:9200"
+    expose:
+      - "9200"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - ./utils/esdata:/usr/share/elasticsearch/data
+
+volumes:
+  mongodb_data:

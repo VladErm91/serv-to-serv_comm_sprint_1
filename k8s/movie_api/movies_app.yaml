@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: movies-app-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: movies-app
+  template:
+    metadata:
+      labels:
+        app: movies-app
+    spec:
+      initContainers:
+        - name: wait-for-db
+          image: busybox
+          command: ['sh', '-c', 'until nc -z -v -w30 $DB_HOST $DB_PORT; do echo "Waiting for database..."; sleep 5; done']
+          envFrom:
+            - secretRef:
+                name: api-movie-env
+        - name: wait-for-redis
+          image: busybox
+          command: ['sh', '-c', 'until nc -z redis 6379; do echo waiting for redis; sleep 2; done;']
+        - name: wait-for-elasticsearch
+          image: busybox
+          command: ['sh', '-c', 'until nc -z elastic 9200; do echo waiting for elasticsearch; sleep 2; done;']
+      containers:
+        - name: movies-app-container
+          image: rikhoff/movies_app:latest
+          command: [ "uvicorn" ]
+          args: [ "--app-dir", "./src", "main:app", "--host", "0.0.0.0", "--port", "8000" ]
+          envFrom:
+            - secretRef:
+                name: api-movie-env
+          ports:
+            - containerPort: 8000
+          livenessProbe:
+            httpGet:
+              path: "/healthcheck"
+              port: 8000
+              httpHeaders:
+                - name: "X-Request-Id"
+                  value: "test-request"
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            timeoutSeconds: 2
+            failureThreshold: 5 
+          readinessProbe:
+            httpGet:
+              path: /healthcheck
+              port: 8000
+              httpHeaders:
+                - name: "X-Request-Id"
+                  value: "test-request"
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            failureThreshold: 2
+          imagePullPolicy: IfNotPresent
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: movies-app-service
+spec:
+  selector:
+    app: movies-app
+  ports:
+    - protocol: TCP
+      port: 8000
+  type: ClusterIP
+---

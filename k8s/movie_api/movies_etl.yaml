@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: movies-etl
+spec:
+  selector: 
+    matchLabels:
+      app: movies-etl
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: movies-etl
+    spec:
+      initContainers:
+        - name: wait-for-db
+          image: busybox
+          command: ['sh', '-c', 'until nc -z -v -w30 $DB_HOST $DB_PORT; do echo "Waiting for database..."; sleep 5; done']
+          envFrom:
+            - secretRef:
+                name: api-movie-env 
+        - name: wait-for-elastic
+          image: busybox
+          command: ['sh', '-c', 'until nc -z elastic 9200; do echo waiting for elasticsearch; sleep 2; done;']
+      containers:
+        - name: movies-etl
+          image: rikhoff/movies_etl:latest 
+          envFrom:
+            - secretRef:
+                name: api-movie-env
+          resources:
+            limits: 
+              memory: "400Mi"
+          imagePullPolicy: IfNotPresent
+---
