@@ -3,10 +3,8 @@ import time
 from http import HTTPStatus
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query
-from typing_extensions import Annotated
-
 from core.jwt import security_jwt
+from fastapi import APIRouter, Depends, HTTPException, Query
 from models.film import Film, FilmDetailed
 from services.film import (
     FilmService,
@@ -14,6 +12,7 @@ from services.film import (
     get_film_service,
     get_multiple_films_service,
 )
+from typing_extensions import Annotated
 
 # Define the cutoff date for unauthorized users
 THREE_YEARS_AGO = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(

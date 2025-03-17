@@ -11,17 +11,36 @@ film_requests_total = Counter(
     ["endpoint", "method"],
 )
 
+film_requests_total.labels(endpoint="/films/popular", method="GET")
+film_requests_total.labels(endpoint="/films/search", method="GET")
+film_requests_total.labels(endpoint="/films/{film_uuid}", method="GET")
+
 film_5xx_errors_total = Counter(
     "film_5xx_errors_total",
     "Total number of 5xx errors for film endpoints",
     ["endpoint", "method", "status_code"],
 )
 
+film_5xx_errors_total.labels(
+    endpoint="/films/popular", method="GET", status_code="500"
+).inc()
+film_5xx_errors_total.labels(
+    endpoint="/films/search", method="GET", status_code="500"
+).inc()
+film_5xx_errors_total.labels(
+    endpoint="/films/{film_uuid}", method="GET", status_code="500"
+).inc()
+
+
 film_request_duration_seconds = Histogram(
-    "likes_request_duration_seconds",
-    "Duration of like requests",
+    "film_request_duration_seconds",
+    "Duration of films requests",
     ["endpoint", "method"],
 )
+
+film_request_duration_seconds.labels(endpoint="/films/popular", method="GET")
+film_request_duration_seconds.labels(endpoint="/films/search", method="GET")
+film_request_duration_seconds.labels(endpoint="/films/{film_uuid}", method="GET")
 
 # Счётчики для запросов к персональным эндпоинтам
 person_requests_total = Counter(
@@ -30,20 +49,40 @@ person_requests_total = Counter(
     ["endpoint", "method"],
 )
 
+person_requests_total.labels(endpoint="/persons/search", method="GET")
+person_requests_total.labels(endpoint="/persons/{person_id}", method="GET")
+person_requests_total.labels(endpoint="/persons/{person_id}/film", method="GET")
+
 person_5xx_errors_total = Counter(
     "person_5xx_errors_total",
     "Total number of 5xx errors for person endpoints",
     ["endpoint", "method", "status_code"],
 )
 
+person_5xx_errors_total.labels(
+    endpoint="/persons/search", method="GET", status_code="500"
+).inc()
+person_5xx_errors_total.labels(
+    endpoint="/persons/{person_id}", method="GET", status_code="500"
+).inc()
+person_5xx_errors_total.labels(
+    endpoint="/persons/{person_id}/film", method="GET", status_code="500"
+).inc()
+
 person_request_duration_seconds = Histogram(
-    "likes_request_duration_seconds",
-    "Duration of like requests",
+    "person_request_duration_seconds",
+    "Duration of persons requests",
     ["endpoint", "method"],
 )
 
+person_request_duration_seconds.labels(endpoint="/persons/search", method="GET")
+person_request_duration_seconds.labels(endpoint="/persons/{person_id}", method="GET")
+person_request_duration_seconds.labels(
+    endpoint="/persons/{person_id}/film", method="GET"
+)
 
-def instrument_person_endpoints() -> Callable[[Info], None]:
+
+def instrument_person() -> Callable[[Info], None]:
     def instrumentation(info: Info) -> None:
         person_endpoint_patterns = {
             "/persons/search": r"^/persons/search$",
@@ -83,11 +122,11 @@ def instrument_person_endpoints() -> Callable[[Info], None]:
     return instrumentation
 
 
-def instrument_film_endpoints() -> Callable[[Info], None]:
+def instrument_film() -> Callable[[Info], None]:
     def instrumentation(info: Info) -> None:
         film_endpoint_patterns = {
-            "/films/popular": re.compile(r"^/api/v1/films/$"),  # Популярные фильмы
-            "/films/search": re.compile(r"^/api/v1/films/search$"),  # Поиск фильмов
+            "/films/popular": re.compile(r"^/api/v1/films/$"),
+            "/films/search": re.compile(r"^/api/v1/films/search$"),
             "/films/{film_uuid}": re.compile(
                 r"^/api/v1/films/[^/]+$"
             ),  # Полная информация по фильму

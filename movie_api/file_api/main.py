@@ -2,7 +2,6 @@ from contextlib import asynccontextmanager
 
 from api.v1 import file_endpoint
 from core.config import settings
-from core.metrics import instrument_file_uploads
 from db.minio import close_minio_conn, create_bucket, start_minio_client
 from fastapi import FastAPI, Request, status
 from fastapi.responses import ORJSONResponse
@@ -44,9 +43,7 @@ async def before_request(request: Request, call_next):
     return response
 
 
-instrumentator = Instrumentator().instrument(app)
-instrumentator.add(instrument_file_uploads())
-instrumentator.expose(app)
+instrumentator = Instrumentator().instrument(app).expose(app)
 
 app.include_router(file_endpoint.router, prefix="/api/files/v1/file", tags=["files"])
 

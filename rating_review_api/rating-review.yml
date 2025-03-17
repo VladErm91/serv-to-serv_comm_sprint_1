@@ -3,7 +3,7 @@ services:
   rating_review_api:
     build: ./mongo_app/app
     expose:
-      - "8765"
+      - "8766"
     depends_on:
       - auth
       - logstash

@@ -10,6 +10,7 @@ from core.logger import setup_logging
 from core.rabbitmq import rabbitmq_manager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from prometheus_fastapi_instrumentator import Instrumentator
 
 # Настройка логирования
 setup_logging()
@@ -41,9 +42,9 @@ app = FastAPI(
     title="Notification Service API",
     description="API для отправки и управления уведомлениями",
     version="1.0.0",
-    docs_url="/api/notifications_api/oopenapi",
+    docs_url="/api/notifications_api/openapi",
     redoc_url="/api/redoc",
-    openapi_url="/api/openapi.json",
+    openapi_url="/api/notifications_api/openapi.json",
     lifespan=lifespan,
 )
 
@@ -62,3 +63,5 @@ setup_middleware(app)
 
 # Подключение роутеров
 app.include_router(api_router, prefix="/api/notifications_api/v1")
+# Подключаем инструментатор
+Instrumentator().instrument(app).expose(app, endpoint="/metrics")

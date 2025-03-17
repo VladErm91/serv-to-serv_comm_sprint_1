@@ -11,12 +11,16 @@ from starlette.responses import StreamingResponse
 router = APIRouter()
 
 
-# Гистограмма времени обработки загрузки файла
-file_upload_duration = Histogram(
-    "file_upload_duration_seconds", "Time spent processing file upload"
+file_upload_requests_total = Counter(
+    "file_upload_requests_total", "Total number of file upload requests", ["file_type"]
 )
+
 file_upload_size_bytes = Counter(
     "file_upload_size_bytes", "Total size of uploaded files in bytes", ["file_type"]
+)
+
+file_upload_duration = Histogram(
+    "file_upload_duration_seconds", "Time spent processing file upload"
 )
 
 
@@ -59,8 +63,15 @@ async def upload_file(
     try:
         start_time = time.time()
         file_data = await file_service.save(file, path)
-        file_upload_duration.observe(time.time() - start_time)  # фиксируем длительность
+        file_type = file.content_type
+
+        # Метрики
+        file_upload_requests_total.labels(file_type=file_type).inc()
         file_upload_size_bytes.labels(file_type=file_type).inc(file_data.size)
+
+        file_upload_duration.labels(file_type=file_type).observe(
+            time.time() - start_time
+        )
 
         return FileDBResponse(
             id=file_data.id,

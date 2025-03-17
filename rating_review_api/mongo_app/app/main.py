@@ -4,6 +4,7 @@ import uvicorn
 from api.v1 import bookmarks, likes, movies, reviews
 from core.config import settings
 from core.logger import LOGGING
+from core.metrics import instrument_bookmarks, instrument_likes, instrument_reviews
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from prometheus_fastapi_instrumentator import Instrumentator
@@ -23,12 +24,11 @@ app = FastAPI(
     default_response_class=ORJSONResponse,
 )
 
-instrumentator = Instrumentator().instrument(app)
-# instrumentator.add(instrument_movies_endpoints())
-# instrumentator.add(instrument_likes_endpoints())
-# instrumentator.add(instrument_reviews_endpoints())
-# instrumentator.add(instrument_bookmarks_endpoints())
-instrumentator.expose(app)
+instrumentator = Instrumentator()
+instrumentator.add(instrument_bookmarks())
+instrumentator.add(instrument_likes())
+instrumentator.add(instrument_reviews())
+instrumentator.instrument(app).expose(app)
 
 
 @app.get("/sentry-debug")
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     uvicorn.run(
         "main:app",
         host="0.0.0.0",
-        port=8765,
+        port=8766,
         log_config=LOGGING,
         log_level=settings.log_level,
         reload=True,
