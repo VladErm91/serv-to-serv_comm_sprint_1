@@ -2,12 +2,11 @@ import time
 from http import HTTPStatus
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, Query
-from typing_extensions import Annotated
-
 from core.jwt import security_jwt
+from fastapi import APIRouter, Depends, HTTPException, Query
 from models.person import FilmRating, PersonFilm
 from services.person import PersonService, get_person_service
+from typing_extensions import Annotated
 
 router = APIRouter()
 

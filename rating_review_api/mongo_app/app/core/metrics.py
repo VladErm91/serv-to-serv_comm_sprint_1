@@ -11,11 +11,21 @@ likes_requests_total = Counter(
     ["endpoint", "method"],
 )
 
-likes_errors_total = Counter(
-    "likes_errors_total",
+likes_requests_total.labels(endpoint="/likes/", method="POST")
+likes_requests_total.labels(endpoint="/average_rating/", method="GET")
+
+likes_5xx_errors_total = Counter(
+    "likes_5xx_errors_total",
     "Total number of errors in like endpoints",
-    ["endpoint", "method", "error_type"],
+    ["endpoint", "method", "status_code"],
 )
+
+likes_5xx_errors_total.labels(
+    endpoint="/likes/", method="POST", status_code="500"
+).inc()
+likes_5xx_errors_total.labels(
+    endpoint="/average_rating/", method="GET", status_code="500"
+).inc()
 
 likes_request_duration_seconds = Histogram(
     "likes_request_duration_seconds",
@@ -23,23 +33,56 @@ likes_request_duration_seconds = Histogram(
     ["endpoint", "method"],
 )
 
+likes_request_duration_seconds.labels(endpoint="/likes/", method="POST")
+likes_request_duration_seconds.labels(endpoint="/average_rating/", method="GET")
+
 # Метрики для эндпоинтов отзывов
 review_requests_total = Counter(
     "review_requests_total",
     "Total number of review-related requests",
     ["endpoint", "method"],
 )
+
+review_requests_total.labels(endpoint="/reviews/", method="POST")
+review_requests_total.labels(endpoint="/reviews/{review_id}/like", method="GET")
+review_requests_total.labels(endpoint="/reviews/{review_id}/dislike", method="GET")
+review_requests_total.labels(endpoint="/movies/{movie_id}/reviews", method="GET")
+
 review_request_duration_seconds = Histogram(
     "review_request_duration_seconds",
     "Duration of review-related requests",
     ["endpoint", "method"],
 )
+
+review_request_duration_seconds.labels(endpoint="/reviews/", method="POST")
+review_request_duration_seconds.labels(
+    endpoint="/reviews/{review_id}/like", method="GET"
+)
+review_request_duration_seconds.labels(
+    endpoint="/reviews/{review_id}/dislike", method="GET"
+)
+review_request_duration_seconds.labels(
+    endpoint="/movies/{movie_id}/reviews", method="GET"
+)
+
 review_5xx_errors_total = Counter(
     "review_5xx_errors_total",
     "Total number of 5xx errors for review endpoints",
     ["endpoint", "method", "status_code"],
 )
 
+review_5xx_errors_total.labels(
+    endpoint="/reviews/", method="POST", status_code="500"
+).inc()
+review_5xx_errors_total.labels(
+    endpoint="/reviews/{review_id}/like", method="GET", status_code="500"
+).inc()
+review_5xx_errors_total.labels(
+    endpoint="/reviews/{review_id}/dislike", method="GET", status_code="500"
+).inc()
+review_5xx_errors_total.labels(
+    endpoint="/movies/{movie_id}/reviews", method="GET", status_code="500"
+).inc()
 
 # Метрики для эндпоинтов закладок
 bookmark_requests_total = Counter(
@@ -47,16 +90,33 @@ bookmark_requests_total = Counter(
     "Total number of bookmark-related requests",
     ["endpoint", "method"],
 )
+
+bookmark_requests_total.labels(endpoint="/bookmarks/", method="POST")
+bookmark_requests_total.labels(endpoint="/users/{user_id}/bookmarks", method="GET")
+
 bookmark_request_duration_seconds = Histogram(
     "bookmark_request_duration_seconds",
     "Duration of bookmark-related requests",
     ["endpoint", "method"],
 )
+
+bookmark_request_duration_seconds.labels(endpoint="/bookmarks/", method="POST")
+bookmark_request_duration_seconds.labels(
+    endpoint="/users/{user_id}/bookmarks", method="GET"
+)
+
 bookmark_5xx_errors_total = Counter(
     "bookmark_5xx_errors_total",
     "Total number of 5xx errors for bookmark endpoints",
     ["endpoint", "method", "status_code"],
 )
+
+bookmark_5xx_errors_total.labels(
+    endpoint="/bookmarks/", method="POST", status_code="500"
+).inc()
+bookmark_5xx_errors_total.labels(
+    endpoint="/users/{user_id}/bookmarks", method="GET", status_code="500"
+).inc()
 
 
 def instrument_likes() -> Callable[[Info], None]:
@@ -134,7 +194,7 @@ def instrument_reviews() -> Callable[[Info], None]:
 def instrument_bookmarks() -> Callable[[Info], None]:
     def instrumentation(info: Info) -> None:
         bookmark_endpoint_patterns = {
-            "/bookmarks/create": r"^/bookmarks/$",
+            "/bookmarks/": r"^/bookmarks/$",
             "/users/{user_id}/bookmarks": r"^/users/[^/]+/bookmarks/$",
         }
 

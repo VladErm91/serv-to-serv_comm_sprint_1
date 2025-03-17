@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logstash-config
+data:
+  logstash.conf: |
+    input {
+      gelf {
+        port => 5044
+      }
+    }
+    
+    filter {
+      date {
+        match => [ "timestamp", "ISO8601" ]
+      }
+    }
+    
+    output {
+      if "rating_review_api" in [tag] {
+        elasticsearch {
+          hosts => ["http://elastic-logs:9201"]
+          index => "rating_review_api-logs-%{+YYYY.MM.dd}"
+        }
+      } else if "mongodb_container" in [tag] {
+        elasticsearch {
+          hosts => ["http://elastic-logs:9201"]
+          index => "mongodb_container-logs-%{+YYYY.MM.dd}"
+        }
+      } else if "logstash" in [tag] {
+        elasticsearch {
+          hosts => ["http://elastic-logs:9201"]
+          index => "logstash-logs-%{+YYYY.MM.dd}"
+        }
+      }
+
+      stdout {
+      }
+    }
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logstash
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: logstash
+  template:
+    metadata:
+      labels:
+        app: logstash
+    spec:
+      containers:
+        - name: logstash
+          image: logstash:8.10.2
+          ports:
+            - containerPort: 5044
+          env:
+            - name: ES_HOST
+              value: "http://elastic-logs:9201"
+          volumeMounts:
+            - name: logstash-config-volume
+              mountPath: /usr/share/logstash/pipeline/logstash.conf
+              subPath: logstash.conf
+          command: ["logstash", "-f", "/usr/share/logstash/pipeline/logstash.conf"]
+      volumes:
+        - name: logstash-config-volume
+          configMap:
+            name: logstash-config
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: logstash
+spec:
+  selector:
+    app: logstash
+  ports:
+    - protocol: UDP
+      port: 5044
+      targetPort: 5044

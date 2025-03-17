@@ -1,3 +1,4 @@
+import asyncio
 import base64
 from datetime import datetime
 from logging import getLogger
@@ -25,6 +26,28 @@ def process_notification(notification: Notification):
 class NotificationService:
     def __init__(self, db):
         self.db = db
+        # Проверяем доступность MongoDB и RabbitMQ при создании сервиса
+        asyncio.create_task(self.check_dependencies())
+
+    async def check_mongodb(self):
+        """Проверка доступности MongoDB."""
+        try:
+            db = mongodb_manager.get_db()
+            await db.command("ping")  # Отправляем ping-команду в MongoDB
+            logger.info("MongoDB доступен")
+        except Exception as e:
+            logger.error(f"MongoDB недоступен: {e}", exc_info=True)
+            raise RuntimeError("MongoDB недоступен")
+
+    async def check_rabbitmq(self) -> bool:
+        """Проверка доступности RabbitMQ."""
+        return await rabbitmq_manager.health_check()
+
+    async def check_dependencies(self):
+        """Проверяет доступность MongoDB и RabbitMQ перед началом работы."""
+        await self.check_mongodb()
+        await self.check_rabbitmq()
+        logger.info("Все зависимости доступны, сервис готов к работе")
 
     async def create_notification(
         self, notification: NotificationRequest

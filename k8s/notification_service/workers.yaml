@@ -1,0 +1,121 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-worker
+  template:
+    metadata:
+      labels:
+        app: notification-worker
+    spec:
+      containers:
+        - name: notification-worker
+          image: rikhoff/notification-worker:latest
+          envFrom:
+            - configMapRef:
+                name: notification-config
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: event-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: event-worker
+  template:
+    metadata:
+      labels:
+        app: event-worker
+    spec:
+      containers:
+        - name: event-worker
+          image: rikhoff/notification-event-worker:latest
+          envFrom:
+            - configMapRef:
+                name: notification-config
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scheduled-celery-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scheduled-celery-worker
+  template:
+    metadata:
+      labels:
+        app: scheduled-celery-worker
+    spec:
+      containers:
+        - name: scheduled-celery-worker
+          image: rikhoff/notification-scheduled-celery-worker:latest
+          envFrom:
+            - configMapRef:
+                name: notification-config
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scheduled-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: scheduled-worker
+  template:
+    metadata:
+      labels:
+        app: scheduled-worker
+    spec:
+      containers:
+        - name: scheduled-worker
+          image: rikhoff/notification-schecd duled-worker:latest
+          envFrom:
+            - configMapRef:
+                name: notification-config
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: celery-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: celery-worker
+  template:
+    metadata:
+      labels:
+        app: celery-worker
+    spec:
+      initContainers:
+        - name: wait-for-rabbitmq
+          image: busybox
+          command: ['sh', '-c', 'until nc -z rabbitmq 5672; do echo waiting for rabbitmq...; sleep 2; done;']
+        - name: wait-for-redis
+          image: busybox
+          command: ['sh', '-c', 'until nc -z redis 6379; do echo waiting for redis...; sleep 2; done;']
+      containers:
+        - name: celery-worker
+          image: rikhoff/notification-celery-worker:latest
+          command: ["celery", "-A", "config", "worker", "--loglevel=info", "--concurrency=4", "--max-tasks-per-child=100"]
+          envFrom:
+            - configMapRef:
+                name: notification-config
+          readinessProbe:
+            exec:
+              command: ["celery", "-A", "config", "inspect", "ping"]
+            initialDelaySeconds: 10
+            periodSeconds: 15

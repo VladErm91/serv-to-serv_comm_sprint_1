@@ -1,9 +1,8 @@
 from typing import List, Optional
 
-from pydantic import BaseModel
-
 from models.genre import Genre
 from models.person import Person
+from pydantic import BaseModel
 
 
 class Film(BaseModel):

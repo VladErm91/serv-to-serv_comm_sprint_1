@@ -11,6 +11,6 @@ COPY . .
 ENV MONGO_URL=mongodb://mongodb:27017
 ENV DATABASE_NAME=cinema
 
-EXPOSE 8765
+EXPOSE 8766
 
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8765"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8766"]

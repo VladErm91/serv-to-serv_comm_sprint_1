@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-kafka-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flask-kafka-web
+  template:
+    metadata:
+      labels:
+        app: flask-kafka-web
+    spec:
+      initContainers:
+        - name: wait-for-kafka
+          image: busybox
+          command: ['sh', '-c', 'until nc -z kafka 9092; do sleep 1; done;']
+      containers:
+        - name: flask-kafka-web
+          image: rikhoff/ugc_app:latest
+          ports:
+            - containerPort: 8002
+          envFrom:
+            - secretRef:
+                name: ugc-env
+          livenessProbe:
+            httpGet:
+              path: /healthcheck
+              port: 8002
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /healthcheck
+              port: 8002
+            initialDelaySeconds: 2
+            periodSeconds: 5
+            failureThreshold: 2
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flask-kafka-web
+spec:
+  ports:
+    - port: 8002
+  selector:
+    app: flask-kafka-web

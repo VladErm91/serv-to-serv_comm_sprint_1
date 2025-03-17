@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: websender
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: websender
+  template:
+    metadata:
+      labels:
+        app: websender
+    spec:
+      containers:
+        - name: websender
+          image: rikhoff/notification-websender-worker:latest
+          ports:
+            - containerPort: 8005
+          envFrom:
+            - configMapRef:
+                name: notification-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: websender
+spec:
+  selector:
+    app: websender
+  ports:
+    - protocol: TCP
+      port: 8005
+      targetPort: 8005

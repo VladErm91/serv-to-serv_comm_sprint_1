@@ -1,0 +1,14 @@
+apiVersion: v1
+data:
+  CLICKHOUSE_HOST: Y2xpY2tob3VzZS0wLmNsaWNraG91c2UuZGVmYXVsdC5zdmMuY2x1c3Rlci5sb2NhbA==
+  CLICKHOUSE_PORT: ODEyMw==
+  KAFKA_API_PORT: OTA5Mg==
+  KAFKA_HOST: a2Fma2E=
+  KAFKA_PORT: MjkwOTI=
+  PROJECT_NAME: dWdjX3NlcnZpY2U=
+  UGC_PORT: ODAwMg==
+kind: Secret
+metadata:
+  name: ugc-env
+  namespace: default
+type: Opaque

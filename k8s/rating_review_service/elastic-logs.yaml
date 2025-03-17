@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: elastic-logs-config
+  namespace: default
+data:
+  discovery.type: "single-node"
+  xpack.security.enabled: "false"
+  ingest.geoip.downloader.enabled: "false"
+  ES_JAVA_OPTS: "-Xms3g -Xmx3g"
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: elastic-logs-pvc
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elastic-logs
+  namespace: default
+  labels:
+    app: elastic-logs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elastic-logs
+  template:
+    metadata:
+      labels:
+        app: elastic-logs
+    spec:
+      containers:
+        - name: elastic-logs
+          image: elasticsearch:8.6.2
+          envFrom:
+            - configMapRef:
+                name: elastic-logs-config
+          resources:
+            limits:
+              memory: "4Gi"
+            requests:
+              memory: "2Gi"
+          ports:
+            - containerPort: 9200
+          volumeMounts:
+            - name: elastic-logs-storage
+              mountPath: /opt/elasticsearch/data
+          readinessProbe:
+            httpGet:
+              path: /_cluster/health
+              port: 9200
+            initialDelaySeconds: 10
+            periodSeconds: 10
+      volumes:
+        - name: elastic-logs-storage
+          persistentVolumeClaim:
+            claimName: elastic-logs-pvc
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: elastic-logs
+spec:
+  selector:
+    app: elastic-logs
+  ports:
+    - protocol: TCP
+      port: 9201
+      targetPort: 9200
+  type: ClusterIP
